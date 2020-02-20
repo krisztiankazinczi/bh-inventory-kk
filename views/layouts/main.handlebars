@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Inventory</title>
+
+    <link rel="stylesheet" type="text/css" href="/bootstrap.css">
+    <script src="/jquery.slim.min.js"></script>
+    <script src="/bootstrap.bundle.js"></script> 
+    <script src="/popper.js"></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row" style="height: 100px;">
+            <div class="col-2 w-100">
+                {{> logo}}
+            </div>
+            <div class="col-10 w-100">
+                {{> header}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-2 main-nav container-fluid text-center">
+                {{> sidebar}}
+            </div>
+            <div class="col-10 w-100">
+                {{{body}}}
+            </div>
+        </div>
+    </div>
+ 
+
+ 
+</body>
+</html>
