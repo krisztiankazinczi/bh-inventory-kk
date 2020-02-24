@@ -19,19 +19,19 @@
             <tbody>
                 {{#each products}}
                 <div class="row">
-                    <tr>
+                    <tr id="{{this.id}}">
                         <div class="col-3">
-                            <td class="align-middle text-center">{{this.rowid}}</td>
+                            <td class="align-middle text-center" data-id="{{this.id}}">{{this.id}}</td>
                         </div>
                         <div class="col-3">
-                            <td class="align-middle text-center">{{this.name}}</td>
+                            <td class="align-middle text-center" data-name="{{this.name}}">{{this.name}}</td>
                         </div>
                         <div class="col-3">
-                            <td class="align-middle text-center">{{this.category}}</td>
+                            <td class="align-middle text-center" data-category="{{this.groupname}}">{{this.groupname}}</td>
                         </div>
                         <div class="col-3">
-                            <td class="align-middle text-center"><button class="btn btn-info">Szerkesztes</button>
-                            <button class="btn btn-danger">Torles</button></td>
+                            <td class="align-middle text-center"><button class="btn btn-info" onclick="editProduct({{this.id}})">Szerkesztes</button>
+                            <button class="btn btn-danger" onclick="deleteProduct({{this.id}})">Torles</button></td>
                         </div>
                     </tr>
                 </div>
@@ -40,8 +40,168 @@
         </table>
     </div>
 
+    <div class="modal fade" id="product" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Uj termek felvitele</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body">
+          <div class="container">
+              <form action="/editProduct" method="POST">
+              <div class="row mt-4">
+                  <div class="col-4 text-center mt-2">
+                      <label for="newproduct">Megnevezes</label>
+                  </div>
+                  <div class="col-8 text-left mt-2">
+                      <input class="w-100" type="text" id="newproduct" name="newproduct">
+                  </div>
+                  <div class="col-4 text-center mt-4">
+                      <label for="product_cat">Csoport</label>
+                  </div>
+                  <div class="col-8 text-left mt-4">
+                      <select class="form-control" id="product-cat" name="product_cat" multiple="multiple">
+                                <option>Valassz csoportot</option>
+                                {{#each group}}
+                                <option value="{{this.groupname}}">{{this.groupname}}</option>
+                                {{/each}}
+                        </select>
+                        <input type="hidden" id="hidden-id" name="id" value="" />
+                  </div>
+                  <div class="col-4 text-center mt-2">
+                      <label for="product_description">Leiras</label>
+                  </div>
+                  <div class="col-8 text-left mt-2">
+                      <input class="w-100" type="text" id="product_description" name="product_description">
+                  </div>
+              </div>
+              <div class="row mt-5">
+                  <div class="col-2">
+                      <button type="button" class="btn btn-info" onclick="cancel()">Megse</button>
+                  </div>
+                  <div class="col-8">
+
+                  </div>
+                  <div class="col-2">
+                      <input type="submit" value="OK" class="btn btn-primary">
+                  </div>
+              </div>
+              </form>
+          </div>
+        
+          
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="modal fade" id="del-product" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Termek torlese</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body">
+          <div class="container">
+              <form action="/deleteProduct" method="POST">
+              <div class="row mt-4">
+                  <h4>Biztosan torlod ezt az elemet?</h4>
+                  <input type="hidden" id="del-id" name="id" value="" />
+              </div>
+              <div class="row mt-5">
+                  <div class="col-2">
+                      <button type="button" class="btn btn-info" onclick="cancel()">Megse</button>
+                  </div>
+                  <div class="col-8">
+
+                  </div>
+                  <div class="col-2">
+                      <input type="submit" value="OK" class="btn btn-primary">
+                  </div>
+              </div>
+              </form>
+          </div>
+        
+          
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 <div class="container text-right d-flex flex-row justify-content-end align-items-center">
-    <button type="button" class="btn btn-primary">Új termék</button>
+    <button id="change-onclick" type="button" class="btn btn-primary" onclick="addProd()">Új termék</button>
 </div>
+
+<script>
+
+    //const selected = document.querySelectorAll('#select-meal-type option:checked');
+    //const values = Array.from(selected).map(el => el.value);
+
+    function addProd() {
+        // biztos ami biztos beallitom a termek hozzaadas endpointot actionkent
+        const form = document.getElementsByTagName('form')[0];
+        form.removeAttribute('action');
+        form.setAttribute('action', '/product');
+
+        $('#product').modal({backdrop: 'static', keyboard: false});  
+    }
+    // ha a user a cancel-ra kattint, mondjuk szerkesztes utan, amikor mar feltoltottem a form elemeit, akkor torlom azokat, hiszen ha uj productra kattintana ezutan, akkor kitoltve toltene be a formot
+    function cancel() {
+        document.getElementById('product-cat').value = "";
+        document.getElementById('newproduct').value = "";
+        document.getElementById('hidden-id').value = "";
+        $('#product').modal('hide');
+    }
+
+    function editProduct(id) {
+        //id=t kapom kattintaskor, a nem es category-t a .children-bol szedem ki
+        const row = document.getElementById(id);
+        let name;
+        let category;
+        for(let i = 0; i < row.children.length; i++ ) {
+            if (row.children[i].getAttribute("data-name")) name = row.children[i].getAttribute("data-name");
+            if (row.children[i].getAttribute("data-category")) category = row.children[i].getAttribute("data-category");
+        }
+        category = category.split(",");
+        console.log(category, name)
+
+
+
+        //fill the modal with the values
+        const productCat = document.getElementById('product-cat');
+        const newproduct = document.getElementById('newproduct');
+        // Ha egy termek tobb kategoriahoz is tartozik, ezzel beallitom, hogy szerkeszteskor mind belegyen jelolve
+        for (var i = 0; i < productCat.options.length; i++) {
+           productCat.options[i].selected = category.indexOf(productCat.options[i].value) >= 0;
+        }
+        //productCat.value = category;
+        newproduct.value = name;
+
+        document.getElementById('hidden-id').value = id;
+
+        //megvaltoztatom a form action reszet a szerkesztes endpointra
+        const form = document.getElementsByTagName('form')[0];
+        form.removeAttribute('action');
+        form.setAttribute('action', '/editProduct');
+
+        // 
+        $('#product').modal({backdrop: 'static', keyboard: false}); 
+    }
+
+    let formContent;
+
+    function deleteProduct(id) {
+        document.getElementById('del-id').value = id;
+        $('#del-product').modal({backdrop: 'static', keyboard: false});
+    }
+
+
+</script>

@@ -1,12 +1,12 @@
   
 <ul class="nav flex-column nav-pills sidebar mt-5">
     <li class="nav-item">
-        <a class="nav-link" href="#">Készletek</a>
+        <a class="nav-link {{#if storage}}active{{/if}}" href="/storage">Készletek</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link active" href="#">Termékek</a>
+        <a class="nav-link {{#if products}}active{{/if}}" href="/product">Termékek</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="#">Csoportok</a>
+        <a class="nav-link {{#if groups}}active{{/if}}" href="/groups">Csoportok</a>
     </li>
 </ul>
