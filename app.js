@@ -20,6 +20,7 @@ app.get('/product', product.product);
 app.post('/product', product.addProduct);
 app.post('/editProduct', product.editProduct);
 app.post('/deleteProduct', product.deleteProduct);
+app.post('/filterCategory', product.filterCategory);
 
 
 

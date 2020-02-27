@@ -1,3 +1,22 @@
+        <div class="row">
+          <div class="col-4 mb-4"></div>
+          <div class="col-4 mb-4">
+            <form action="/filterCategory" method="POST">
+            <select class="form-control" name="product_cat_filter">
+              <option value="">Valassz csoportot</option>
+                {{#each group}}
+                  <option value="{{this.groupname}}">{{this.groupname}}</option>
+                {{/each}}
+            </select>
+            
+          </div>
+          <div class="col-4 text-left mb-4">
+            <input type="submit" value="Szures" class="btn btn-primary">
+            </form>
+          </div>
+        </div>
+        
+        
         <div class="table-responsive">
         <table class="table table-striped table-bordered table-hover">
             <thead>
@@ -6,10 +25,10 @@
                         <th class="align-middle text-center">ID</th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center">Megnevezes</th>
+                        <th class="align-middle text-center"><a id="product_name_link">Megnevezes</a></th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center">Csoport</th>
+                        <th class="align-middle text-center"><a id="product_cat_link">Csoport</a></th>
                     </div>
                     <div class="col-3 w-100">
                         <th class="align-middle text-center">Muveletek</th>
@@ -40,6 +59,22 @@
         </table>
     </div>
 
+    <div class="container text-right d-flex flex-row justify-content-end align-items-center">
+    <button id="change-onclick" type="button" class="btn btn-primary" onclick="addProd()">Új termék</button>
+    </div>
+
+    <div class="row">
+      <div class="col-4"></div>
+      <div class="col-4">
+        <ul id="pagination" class="pagination">
+          <a id="prev"><li class="btn btn-info mr-2">Elozo</li></a>
+          <li id="page-current" class="btn border mr-2">1</li>
+          <a id="next"><li class="btn btn-info">Kovetkezo</li></a>
+        </ul>
+      </div>
+      <div class="col-4"></div>
+    </div>
+
     <div class="modal fade" id="product" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -54,10 +89,10 @@
               <form action="/editProduct" method="POST">
               <div class="row mt-4">
                   <div class="col-4 text-center mt-2">
-                      <label for="newproduct">Megnevezes</label>
+                      <label for="product_name">Megnevezes</label>
                   </div>
                   <div class="col-8 text-left mt-2">
-                      <input class="w-100" type="text" id="newproduct" name="newproduct">
+                      <input class="w-100" type="text" id="product_name" name="product_name">
                   </div>
                   <div class="col-4 text-center mt-4">
                       <label for="product_cat">Csoport</label>
@@ -136,32 +171,97 @@
 
 
 
-<div class="container text-right d-flex flex-row justify-content-end align-items-center">
-    <button id="change-onclick" type="button" class="btn btn-primary" onclick="addProd()">Új termék</button>
-</div>
+
 
 <script>
+     //ezzel a functionnal szedem ki a query string erteket front-enden
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        };
 
-    //const selected = document.querySelectorAll('#select-meal-type option:checked');
-    //const values = Array.from(selected).map(el => el.value);
+    const orderby = getUrlParameter("orderby");
+    const order = getUrlParameter("order");
+    let page = getUrlParameter("page");
+    if (!page) page = 1;
+
+
+    const prodNameLink = document.getElementById('product_name_link');
+    const prodCatLink = document.getElementById('product_cat_link');
+
+    // pagination megfelelo felparameterezese
+    const prevPage = document.getElementById('prev');
+    const nextPage = document.getElementById('next');
+    const actualPage = document.getElementById('page-current');
+    
+    actualPage.innerText = page;
+    if (page == 1) {
+      prevPage.style.display = "none";
+      nextPage.href = `/product?page=${+page + 1}`;
+      prodNameLink.href = `/product?page=${+page}&orderby=product_name&order=asc`;
+      prodCatLink.href = `/product?page=${+page}&orderby=product_cat&order=asc`;
+    }
+    else {
+      prevPage.href = `/product?page=${+page - 1}`;
+      nextPage.href = `/product?page=${+page + 1}`;
+      prodNameLink.href = `/product?page=${+page}&orderby=product_name&order=asc`;
+      prodCatLink.href = `/product?page=${+page}&orderby=product_cat&order=asc`;
+    }
+
+
+    // beallitom a rendezesi linkeket a query string ertekei alapjan es beallitom a megfelelo iconokat (main.handlebarsban cdn!!!)
+    if (orderby === "product_name" && order === "asc") {
+      prodNameLink.href = `/product?page=${page}&orderby=product_name&order=desc`;
+      prodCatLink.href = `/product?page=${page}&orderby=product_cat&order=asc`;
+      prodNameLink.innerHTML += ` <i class='lni lni-angle-double-up'></i>`;
+    }
+    if (orderby === "product_name" && order === "desc") {
+      prodNameLink.href = `/product?page=${page}&orderby=product_name&order=asc`;
+      prodCatLink.href = `/product?page=${page}&orderby=product_cat&order=asc`;
+      prodNameLink.innerHTML += ` <i class='lni lni-angle-double-down'></i>`;
+    }
+    if (orderby === "product_cat" && order === "asc") {
+      prodNameLink.href = `/product?page=${page}&orderby=product_name&order=asc`;
+      prodCatLink.href = `/product?page=${page}&orderby=product_cat&order=desc`;
+      prodCatLink.innerHTML += ` <i class='lni lni-angle-double-up'></i>`;
+    }
+    if (orderby === "product_cat" && order === "desc") {
+      prodNameLink.href = `/product?page=${page}&orderby=product_name&order=asc`;
+      prodCatLink.href = `/product?page=${page}&orderby=product_cat&order=asc`;
+      prodCatLink.innerHTML += ` <i class='lni lni-angle-double-down'></i>`;
+    }
+  
+
+  const form = document.getElementsByTagName('form')[0];
+  const productCat = document.getElementById('product-cat');
+  const productName = document.getElementById('product_name');
+  const hiddenId = document.getElementById('hidden-id');
+  const delId = document.getElementById('del-id');
+
 
     function addProd() {
         // biztos ami biztos beallitom a termek hozzaadas endpointot actionkent
-        const form = document.getElementsByTagName('form')[0];
+        productCat.value = "";
+        productName.value = "";
+        hiddenId.value = "";
+
         form.removeAttribute('action');
         form.setAttribute('action', '/product');
 
-        $('#product').modal({backdrop: 'static', keyboard: false});  
+        $('#product').modal();  
     }
-    // ha a user a cancel-ra kattint, mondjuk szerkesztes utan, amikor mar feltoltottem a form elemeit, akkor torlom azokat, hiszen ha uj productra kattintana ezutan, akkor kitoltve toltene be a formot
+
     function cancel() {
-        document.getElementById('product-cat').value = "";
-        document.getElementById('newproduct').value = "";
-        document.getElementById('hidden-id').value = "";
         $('#product').modal('hide');
     }
 
     function editProduct(id) {
+      // kinullazom az elkuldendo ertekeket, ha netalantan kikattintott a user egy elozo szerkesztes modalbol
+        productCat.value = "";
+        productName.value = "";
+        hiddenId.value = "";
         //id=t kapom kattintaskor, a nem es category-t a .children-bol szedem ki
         const row = document.getElementById(id);
         let name;
@@ -170,37 +270,33 @@
             if (row.children[i].getAttribute("data-name")) name = row.children[i].getAttribute("data-name");
             if (row.children[i].getAttribute("data-category")) category = row.children[i].getAttribute("data-category");
         }
-        category = category.split(",");
+        console.log(category)
+        //a splittel mindenkeppen tomb jon letre, ha csak egy kategoriat valasztottunk ki, akkor egy egy elemu array
+        category = category.split(",")
         console.log(category, name)
 
 
-
-        //fill the modal with the values
-        const productCat = document.getElementById('product-cat');
-        const newproduct = document.getElementById('newproduct');
         // Ha egy termek tobb kategoriahoz is tartozik, ezzel beallitom, hogy szerkeszteskor mind belegyen jelolve
-        for (var i = 0; i < productCat.options.length; i++) {
+        for (let i = 0; i < productCat.options.length; i++) {
            productCat.options[i].selected = category.indexOf(productCat.options[i].value) >= 0;
         }
         //productCat.value = category;
-        newproduct.value = name;
+        productName.value = name;
 
-        document.getElementById('hidden-id').value = id;
+        hiddenId.value = id;
 
         //megvaltoztatom a form action reszet a szerkesztes endpointra
-        const form = document.getElementsByTagName('form')[0];
         form.removeAttribute('action');
         form.setAttribute('action', '/editProduct');
 
         // 
-        $('#product').modal({backdrop: 'static', keyboard: false}); 
+        $('#product').modal(); 
     }
 
-    let formContent;
 
     function deleteProduct(id) {
-        document.getElementById('del-id').value = id;
-        $('#del-product').modal({backdrop: 'static', keyboard: false});
+        delId.value = id;
+        $('#del-product').modal();
     }
 
 

@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('inventory1.db')
+const db = new sqlite3.Database('inventory.db')
 
 db.serialize(function () {
 
@@ -10,6 +10,7 @@ db.serialize(function () {
     db.run("INSERT INTO groups(groupname) VALUES ('Szepsegapolas')");
     db.run("INSERT INTO groups(groupname) VALUES ('Szorakozas')");
     db.run("INSERT INTO groups(groupname) VALUES ('Futestechnika')");
+    db.run("INSERT INTO groups(groupname) VALUES ('Elelmiszer')");
 
     db.run("CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(100) NOT NULL, description TEXT NOT NULL)");
 

@@ -6,10 +6,10 @@
                         <th class="align-middle text-center">ID</th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center">Megnevezes</th>
+                        <th class="align-middle text-center"><a id="product_name_link">Megnevezes</a></th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center">Mennyiseg</th>
+                        <th class="align-middle text-center"><a id="product_quantity">Mennyiseg</a></th>
                     </div>
                     <div class="col-3 w-100">
                         <th class="align-middle text-center">Muveletek</th>
@@ -30,7 +30,7 @@
                             <td class="align-middle text-center">{{this.stock}}</td>
                         </div>
                         <div class="col-3">
-                            <td class="align-middle text-center"><button class="btn btn-info">Szerkesztes</button></td>
+                            <td class="align-middle text-center"><button class="btn btn-info" onclick="editQuantity({{id}})">Szerkesztes</button></td>
                         </div>
                     </tr>
                 </div>
@@ -39,36 +39,39 @@
         </table>
     </div>
 
-    <div class="modal fade" id="new-product" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="row">
+      <div class="col-4"></div>
+      <div class="col-4">
+        <ul id="pagination" class="pagination">
+          <a id="prev"><li class="btn btn-info mr-2">Elozo</li></a>
+          <li id="page-current" class="btn border mr-2">1</li>
+          <a id="next"><li class="btn btn-info">Kovetkezo</li></a>
+        </ul>
+      </div>
+      <div class="col-4"></div>
+    </div>
+
+
+
+<div class="modal fade" id="stock" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">Uj termek felvitele</h5>
+        <h5 class="modal-title" id="modal-title">Add meg az adott termek darabszamat!</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body" id="modal-body">
           <div class="container">
-              <form action="/product" method="POST">
-              <div class="row mt-4">
+              <form action="/storage/editStock" method="POST">
+              <div class="row mt-4" id="modal-content">
                   <div class="col-4 text-center mt-2">
-                      <label for="newproduct">Megnevezes</label>
+                      <label for="stock_quantity">db:</label>
                   </div>
                   <div class="col-8 text-left mt-2">
-                      <input class="w-100" type="text" id="newproduct" name="newproduct">
-                  </div>
-                  <div class="col-4 text-center mt-4">
-                      <label for="choosenGroup">Csoport</label>
-                  </div>
-                  <div class="col-8 text-left mt-4">
-                      <select class="form-control" id="choosenGroup" name="choosenGroup" required>
-                                <option>Valassz csoportot</option>
-                                <option value="Szamitastechnika">Szamitastechnika</option>
-                                <option value="Konyhatechnika">Konyhatechnika</option>
-                                <option value="Szépségápolás">Szépségápolás</option>
-                                <option value="Szorakozas">Szorakozas</option>
-                        </select>
+                      <input class="w-100" type="text" id="stock_quantity" name="stock_quantity">
+                      <input type="hidden" id="stock_item_id" name="stock_item_id" value="" >
                   </div>
               </div>
               <div class="row mt-5">
@@ -84,21 +87,76 @@
               </div>
               </form>
           </div>
-        
-          
-      </div>
-    </div>
-  </div>
-</div>
 
 
 
 <script>
-    function addProd() {
-        $('#new-product').modal();
+
+  function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        };
+
+    const orderby = getUrlParameter("orderby");
+    const order = getUrlParameter("order");
+    let page = getUrlParameter("page");
+    if (!page) page = 1;
+
+    const prodNameLink = document.getElementById('product_name_link');
+    const prodQuantityLink = document.getElementById('product_quantity');
+
+    const prevPage = document.getElementById('prev');
+    const nextPage = document.getElementById('next');
+    const actualPage = document.getElementById('page-current');
+    // ha nincs order and orderby parameter, akkor ez a resz beparameterezi a linkeket
+    actualPage.innerText = page;
+    if (page == 1) {
+      prevPage.style.display = "none";
+      nextPage.href = `/storage?page=${+page + 1}`;
+      prodNameLink.href = `/storage?page=${+page}&orderby=product_name&order=asc`;
+      prodQuantityLink.href = `/storage?page=${+page}&orderby=product_quantity&order=asc`;
+    }
+    else {
+      prevPage.href = `/storage?page=${+page - 1}`;
+      nextPage.href = `/storage?page=${+page + 1}`;
+      prodNameLink.href = `/storage?page=${+page}&orderby=product_name&order=asc`;
+      prodQuantityLink.href = `/storage?page=${+page}&orderby=product_quantity&order=asc`;
+    }
+
+
+    // beallitom a rendezesi linkeket a query string ertekei alapjan es beallitom a megfelelo iconokat (main.handlebarsban cdn!!!)
+    if (orderby === "product_name" && order === "asc") {
+      prodNameLink.href = `/storage?page=${page}&orderby=product_name&order=desc`;
+      prodQuantityLink.href = `/storage?page=${page}&orderby=product_quantity&order=asc`;
+      prodNameLink.innerHTML += ` <i class='lni lni-angle-double-up'></i>`;
+    }
+    if (orderby === "product_name" && order === "desc") {
+      prodNameLink.href = `/storage?page=${page}&orderby=product_name&order=asc`;
+      prodQuantityLink.href = `/storage?page=${page}&orderby=product_quantity&order=asc`;
+      prodNameLink.innerHTML += ` <i class='lni lni-angle-double-down'></i>`;
+    }
+    if (orderby === "product_quantity" && order === "asc") {
+      prodNameLink.href = `/storage?page=${page}&orderby=product_name&order=asc`;
+      prodQuantityLink.href = `/storage?page=${page}&orderby=product_quantity&order=desc`;
+      prodQuantityLink.innerHTML += ` <i class='lni lni-angle-double-up'></i>`;
+    }
+    if (orderby === "product_quantity" && order === "desc") {
+      prodNameLink.href = `/storage?page=${page}&orderby=product_name&order=asc`;
+      prodQuantityLink.href = `/storage?page=${page}&orderby=product_quantity&order=asc`;
+      prodQuantityLink.innerHTML += ` <i class='lni lni-angle-double-down'></i>`;
+    }
+
+   
+
+    function editQuantity(id) {
+      document.getElementById('stock_item_id').value = id;
+        $('#stock').modal();
     }
 
     function cancel() {
-        $('#new-product').modal('hide');
+      document.getElementById('stock_item_id').value = "";
+        $('#stock').modal('hide');
     }
 </script>
