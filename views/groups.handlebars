@@ -24,14 +24,14 @@
                             <td class="align-middle text-center" data-id="{{this.id}}">{{this.id}}</td>
                         </div>
                         <div class="col-3">
-                            <td class="align-middle text-center" data-groupname="{{this.groupname}}">{{this.groupname}}</td>
+                            <td class="align-middle text-center" {{#unless this.parent_id}}data-main-group="{{this.id}}"{{/unless}} data-groupname="{{this.groupname}}">{{this.groupname}}</td>
                         </div>
                         <div class="col-3">
                             <td class="align-middle text-center"><button class="btn btn-info" onclick="editGroup({{this.id}})">Szerkesztes</button>
                             <button class="btn btn-danger" onclick="deleteGroup({{this.id}})">Torles</button></td>
                         </div>
                         <div class="col-3 w-100">
-                        
+        
                         </div>
                     </tr>
                 </div>
@@ -66,6 +66,21 @@
                       <input type="hidden" id="hidden-id" name="id" value="" >
                   </div>
               </div>
+              <div id="main-groups">
+              <div class="row mt-4" id="add-new-group">
+                  <div class="col-4 text-center mt-2">
+                      <label for="group_name">Focsoport</label>
+                  </div>
+                  <div class="col-8 text-left mt-2">
+                      <select class="form-control" name="group_main_id">
+                            {{#each groups}}
+                                {{#unless this.parent_id}}<option value="{{this.id}}">{{this.groupname}}</option>{{/unless}}
+                            {{/each}}
+                            <option value="0">Uj focsoport</option>
+                      </select>
+                  </div>
+              </div>
+              </div>
               <div class="row mt-5">
                   <div class="col-2">
                       <button type="button" class="btn btn-info" onclick="cancel()">Megse</button>
@@ -98,22 +113,27 @@
                       <input class="w-100" type="text" id="group_name" name="group_name">
                       <input type="hidden" id="hidden-id" name="id" value="" >
                   </div>`;
+    let addNewGroup;
       // A modal megfelelo elemeit elmentem, hogy a gombokra kattintva feltoltsem megfelelo tartalommal
       const modalTitle = document.getElementById('modal-title');
       const modalContent = document.getElementById('modal-content');
+      
       // a modalban a formot minden gombkattintassal felparameterezem a megfelelo action endpointtal
       const form = document.getElementsByTagName('form')[0];
 
       // megkeresem a megfelelo termekkategoriat a sor id-ja alapjan
-      function getGroupname(id) {
+      function getAttribute(id, attribute) {
         const row = document.getElementById(id);
         for(let i = 0; i < row.children.length; i++ ) {
-            if (row.children[i].getAttribute("data-groupname")) return row.children[i].getAttribute("data-groupname");
+            if (row.children[i].getAttribute(attribute)) return row.children[i].getAttribute(attribute);
         }
       }
 
 
     function addGroup() {
+        //eleg csak egyszer eltarolni a modal tartalmat
+        if (addNewGroup) document.getElementById('main-groups').innerHTML = addNewGroup;
+
       modalContent.innerHTML = addProdModalContent;
       modalTitle.innerText = 'Uj termekkategoria hozzaadasa';
 
@@ -123,17 +143,19 @@
     }
 
     function editGroup(id) {
+        if (addNewGroup) document.getElementById('main-groups').innerHTML = addNewGroup;
         // beallitom az alap modal structuret
         modalContent.innerHTML = addProdModalContent;
         modalTitle.innerText = 'Termekkategoria nevenek szerkesztese';
         // megkeresem az adott id-ju sort es feltoltom a groupname mezot a megfelelo data-group attributum ertekevel
-        
+
         document.getElementById('hidden-id').value = id;
-        const groupname = getGroupname(id);
+        
+        
         
         // erteket adok a szervernek elkuldendo groupname-nek
-        const group_name = document.getElementById('group_name');
-        group_name.value = groupname;
+        document.getElementById('group_name').value = getAttribute(id, "data-groupname");
+        document.getElementById('group_main_id').value = getAttribute(id, "data-main_group");
 
         
         form.removeAttribute('action');
@@ -145,9 +167,15 @@
     }
 
     function deleteGroup(id) {
+        if (!addNewGroup) addNewGroup = document.getElementById('main-groups').innerHTML;
+        //nem birtam kiszervezni valtozoba, mert torles utan null lett az erteke
+        if (document.getElementById('add-new-group')) document.getElementById('add-new-group').parentNode.removeChild(document.getElementById('add-new-group'));
+    
       modalContent.innerHTML = deleteModalContent;
       document.getElementById('get-group').innerHTML += `<b><i>${getGroupname(id)}</i></b> termekkategoriat?`;
       modalTitle.innerText = 'Termekkategoria torlese';
+      
+      
 
       form.removeAttribute('action');
       form.setAttribute('action', '/groups/delGroup');

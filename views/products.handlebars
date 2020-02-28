@@ -98,10 +98,12 @@
                       <label for="product_cat">Csoport</label>
                   </div>
                   <div class="col-8 text-left mt-4">
-                      <select class="form-control" id="product-cat" name="product_cat" multiple="multiple">
+                      <select class="form-control" id="product-cat" name="product_cat" multiple=true>
                                 <option>Valassz csoportot</option>
                                 {{#each group}}
+                                <optgroup  label="{{this.groupname}}">
                                 <option value="{{this.groupname}}">{{this.groupname}}</option>
+                                </optgroup>
                                 {{/each}}
                         </select>
                         <input type="hidden" id="hidden-id" name="id" value="" />

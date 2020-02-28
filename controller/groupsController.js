@@ -5,9 +5,8 @@ const db = new sqlite3.Database('inventory.db');
 
 router.get('/', (req, res) => {
     db.serialize(function () {
-        db.all("SELECT * FROM groups", function (err, results) {
+        db.all("SELECT id, groupname, parent_id FROM groups", function (err, results) {
             if (err) console.error(err.toString());
-
             res.render('groups', {
                 pageTitle: 'Csoportok',
                 groups: results
@@ -19,14 +18,16 @@ router.get('/', (req, res) => {
 
 
 router.post('/addGroup', (req, res) => {
-    const { group_name } = req.body;
-
+    const { group_name, group_main_id } = req.body;
+    console.log(group_name, group_main_id)
     db.serialize(function () {
 
         if (group_name) {
-            db.run(`INSERT INTO groups(groupname) VALUES ("${group_name}")`, (err) => {
-              if (err) console.error(err.toString());
-            });
+            const stmt = db.prepare("INSERT INTO groups(groupname, parent_id) VALUES (?,?)");
+            (group_main_id == "0") ? stmt.run(group_name, null) : stmt.run(group_name, group_main_id);
+            // db.run(`INSERT INTO groups(groupname, parent_id) VALUES ("${group_name}", ${group_main_id})`, (err) => {
+            //   if (err) console.error(err.toString());
+            // });
         }
         res.redirect('/groups');
     });

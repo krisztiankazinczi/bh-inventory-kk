@@ -3,14 +3,14 @@ const db = new sqlite3.Database('inventory.db')
 
 db.serialize(function () {
 
-    db.run("CREATE TABLE IF NOT EXISTS groups (id INTEGER PRIMARY KEY AUTOINCREMENT, groupname VARCHAR(60) NOT NULL)");
+    db.run("CREATE TABLE IF NOT EXISTS groups (id INTEGER PRIMARY KEY AUTOINCREMENT, groupname VARCHAR(60) NOT NULL, parent_id INTEGER)");
 
-    db.run("INSERT INTO groups(groupname) VALUES ('Szamitastechnika')");
-    db.run("INSERT INTO groups(groupname) VALUES ('Konyhatechnika')");
-    db.run("INSERT INTO groups(groupname) VALUES ('Szepsegapolas')");
-    db.run("INSERT INTO groups(groupname) VALUES ('Szorakozas')");
-    db.run("INSERT INTO groups(groupname) VALUES ('Futestechnika')");
-    db.run("INSERT INTO groups(groupname) VALUES ('Elelmiszer')");
+    db.run("INSERT INTO groups(groupname, parent_id) VALUES ('Szamitastechnika', NULL)");
+    db.run("INSERT INTO groups(groupname, parent_id) VALUES ('Konyhatechnika', 1)");
+    db.run("INSERT INTO groups(groupname, parent_id) VALUES ('Szepsegapolas', 1)");
+    db.run("INSERT INTO groups(groupname, parent_id) VALUES ('Szorakozas', NULL)");
+    db.run("INSERT INTO groups(groupname, parent_id) VALUES ('Futestechnika', 4)");
+    db.run("INSERT INTO groups(groupname, parent_id) VALUES ('Elelmiszer', 4)");
 
     db.run("CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(100) NOT NULL, description TEXT NOT NULL)");
 
