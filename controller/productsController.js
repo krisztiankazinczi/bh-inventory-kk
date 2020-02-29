@@ -49,8 +49,19 @@ function product(req, res) {
 
 
                 // lekerem az osszes csoportot a drop-down megjelenitesehez
-                db.all("SELECT * FROM groups", function (err, groups) {
+                db.all("SELECT id, groupname, parent_id FROM groups ORDER BY parent_id, id ASC", function (err, groups) {
                     if (err) console.error(err.toString())
+                    //a fokategoriak ala rendezem az alkategoriakat, hogy a handlebars megfelelo sorrendben jelentise meg es a fokategoriak ala keruljenek az alkategoriak
+                    for(let i = 0; i < groups.length; i++) {
+                      if (groups[i].parent_id === 0) {
+                        for(let j = 0; j < groups.length; j++) {
+                          if (groups[j].parent_id == groups[i].id) {
+                            groups.splice(i+1, 0, ...groups.splice(j, 1))
+                          }
+                        }
+                      }
+                    }
+
                     res.render('products', {
                         pageTitle: 'Termékek',
                         products: products,
@@ -97,8 +108,6 @@ function addProduct(req, res) {
 
                         db.get(`SELECT id FROM groups WHERE groupname = "${product_cat[i]}"`, (err, group_id) => {
                             if (err) console.error(err.toString());
-                            console.log(group_id.id)
-                            console.log(product_id.id)
 
                             db.run(`INSERT INTO product_in_group(product_id, group_id) VALUES (${product_id.id}, ${group_id.id})`, (err) => {
                                 if (err) console.error(err.toString());

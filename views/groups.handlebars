@@ -24,7 +24,7 @@
                             <td class="align-middle text-center" data-id="{{this.id}}">{{this.id}}</td>
                         </div>
                         <div class="col-3">
-                            <td class="align-middle text-center" {{#unless this.parent_id}}data-main-group="{{this.id}}"{{/unless}} data-groupname="{{this.groupname}}">{{this.groupname}}</td>
+                            <td class="align-middle text-center" {{#unless this.parent_id}} data-main-group={{this.id}} {{/unless}} data-main-group="{{this.parent_id}}" data-groupname="{{this.groupname}}">{{this.groupname}}</td>
                         </div>
                         <div class="col-3">
                             <td class="align-middle text-center"><button class="btn btn-info" onclick="editGroup({{this.id}})">Szerkesztes</button>
@@ -72,7 +72,7 @@
                       <label for="group_name">Focsoport</label>
                   </div>
                   <div class="col-8 text-left mt-2">
-                      <select class="form-control" name="group_main_id">
+                      <select class="form-control" id="group_main_id" name="group_main_id">
                             {{#each groups}}
                                 {{#unless this.parent_id}}<option value="{{this.id}}">{{this.groupname}}</option>{{/unless}}
                             {{/each}}
@@ -121,7 +121,7 @@
       // a modalban a formot minden gombkattintassal felparameterezem a megfelelo action endpointtal
       const form = document.getElementsByTagName('form')[0];
 
-      // megkeresem a megfelelo termekkategoriat a sor id-ja alapjan
+      // megkeresem a megfelelo termekkategoriat a sor id-ja alapjan data attributumok alapjan
       function getAttribute(id, attribute) {
         const row = document.getElementById(id);
         for(let i = 0; i < row.children.length; i++ ) {
@@ -151,11 +151,9 @@
 
         document.getElementById('hidden-id').value = id;
         
-        
-        
-        // erteket adok a szervernek elkuldendo groupname-nek
+        // erteket adok a szervernek elkuldendo parametereknek
         document.getElementById('group_name').value = getAttribute(id, "data-groupname");
-        document.getElementById('group_main_id').value = getAttribute(id, "data-main_group");
+        document.getElementById('group_main_id').value = getAttribute(id, "data-main-group");
 
         
         form.removeAttribute('action');
@@ -172,7 +170,7 @@
         if (document.getElementById('add-new-group')) document.getElementById('add-new-group').parentNode.removeChild(document.getElementById('add-new-group'));
     
       modalContent.innerHTML = deleteModalContent;
-      document.getElementById('get-group').innerHTML += `<b><i>${getGroupname(id)}</i></b> termekkategoriat?`;
+      document.getElementById('get-group').innerHTML += `<b><i>${getAttribute(id, "data-groupname")}</i></b> termekkategoriat?`;
       modalTitle.innerText = 'Termekkategoria torlese';
       
       
