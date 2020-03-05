@@ -11,6 +11,10 @@ app.use(express.json());
 app.use(express.urlencoded( { extended: true} ) );
 
 app.engine('handlebars', exphbs());
+app.engine('handlebars', exphbs({
+  extname: 'handlebars',
+  helpers: require('./views/config/handlebars-helpers')
+}));
 app.set('view engine', 'handlebars');
 
 app.use(express.static('public'))

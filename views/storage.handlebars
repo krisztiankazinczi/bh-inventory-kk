@@ -6,10 +6,10 @@
                         <th class="align-middle text-center">ID</th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center"><a id="product_name_link">Megnevezes</a></th>
+                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_name"}}href="/storage?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}href="/storage?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/storage?page={{page}}&orderby=product_name&order=asc"{{/unless}} {{#ifeq orderby "product_quantity"}}href="/storage?page={{page}}&orderby=product_name&order=asc"{{/ifeq}}>Megnevezes{{#ifequals order "asc" orderby "product_name"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center"><a id="product_quantity">Mennyiseg</a></th>
+                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_quantity"}}href="/storage?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_quantity"}}href="/storage?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/storage?page={{page}}&orderby=product_quantity&order=asc"{{/unless}} {{#ifeq orderby "product_name"}}href="/storage?page={{page}}&orderby=product_quantity&order=asc"{{/ifeq}}>Mennyiseg{{#ifequals order "asc" orderby "product_quantity"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_quantity"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
                     </div>
                     <div class="col-3 w-100">
                         <th class="align-middle text-center">Muveletek</th>
@@ -43,7 +43,10 @@
       <div class="col-4"></div>
       <div class="col-4">
         <ul id="pagination" class="pagination">
-          <a id="prev"><li class="btn btn-info mr-2">Elozo</li></a>
+          <input type="hidden" id="page-num" value="{{page}}">
+          <input type="hidden" id="page-order" value="{{order}}">
+          <input type="hidden" id="page-orderby" value="{{orderby}}">
+          <a id="prev"><li class="btn btn-info mr-2" >Elozo</li></a>
           <li id="page-current" class="btn border mr-2">1</li>
           <a id="next"><li class="btn btn-info">Kovetkezo</li></a>
         </ul>
@@ -92,63 +95,33 @@
 
 <script>
 
-  function getUrlParameter(name) {
-        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-        var results = regex.exec(location.search);
-        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        };
-
-    const orderby = getUrlParameter("orderby");
-    const order = getUrlParameter("order");
-    let page = getUrlParameter("page");
-    if (!page) page = 1;
-
-    const prodNameLink = document.getElementById('product_name_link');
-    const prodQuantityLink = document.getElementById('product_quantity');
+    const page = document.getElementById('page-num').value;
+    const page_order = document.getElementById('page-order').value;
+    const page_orderby = document.getElementById('page-orderby').value;
 
     const prevPage = document.getElementById('prev');
     const nextPage = document.getElementById('next');
     const actualPage = document.getElementById('page-current');
-    // ha nincs order and orderby parameter, akkor ez a resz beparameterezi a linkeket
+
+    //pagination linkek generalasa
+
     actualPage.innerText = page;
     if (page == 1) {
       prevPage.style.display = "none";
       nextPage.href = `/storage?page=${+page + 1}`;
-      prodNameLink.href = `/storage?page=${+page}&orderby=product_name&order=asc`;
-      prodQuantityLink.href = `/storage?page=${+page}&orderby=product_quantity&order=asc`;
+      if (page_order && page_orderby) {
+        nextPage.href = `/storage?page=${+page + 1}&orderby=${page_orderby}&order=${page_order}`;
+      }
     }
     else {
       prevPage.href = `/storage?page=${+page - 1}`;
       nextPage.href = `/storage?page=${+page + 1}`;
-      prodNameLink.href = `/storage?page=${+page}&orderby=product_name&order=asc`;
-      prodQuantityLink.href = `/storage?page=${+page}&orderby=product_quantity&order=asc`;
+      if (page_order && page_orderby) {
+        prevPage.href = `/storage?page=${+page - 1}&orderby=${page_orderby}&order=${page_order}`;
+        nextPage.href = `/storage?page=${+page + 1}&orderby=${page_orderby}&order=${page_order}`;
+      }
     }
 
-
-    // beallitom a rendezesi linkeket a query string ertekei alapjan es beallitom a megfelelo iconokat (main.handlebarsban cdn!!!)
-    if (orderby === "product_name" && order === "asc") {
-      prodNameLink.href = `/storage?page=${page}&orderby=product_name&order=desc`;
-      prodQuantityLink.href = `/storage?page=${page}&orderby=product_quantity&order=asc`;
-      prodNameLink.innerHTML += ` <i class='lni lni-angle-double-up'></i>`;
-    }
-    if (orderby === "product_name" && order === "desc") {
-      prodNameLink.href = `/storage?page=${page}&orderby=product_name&order=asc`;
-      prodQuantityLink.href = `/storage?page=${page}&orderby=product_quantity&order=asc`;
-      prodNameLink.innerHTML += ` <i class='lni lni-angle-double-down'></i>`;
-    }
-    if (orderby === "product_quantity" && order === "asc") {
-      prodNameLink.href = `/storage?page=${page}&orderby=product_name&order=asc`;
-      prodQuantityLink.href = `/storage?page=${page}&orderby=product_quantity&order=desc`;
-      prodQuantityLink.innerHTML += ` <i class='lni lni-angle-double-up'></i>`;
-    }
-    if (orderby === "product_quantity" && order === "desc") {
-      prodNameLink.href = `/storage?page=${page}&orderby=product_name&order=asc`;
-      prodQuantityLink.href = `/storage?page=${page}&orderby=product_quantity&order=asc`;
-      prodQuantityLink.innerHTML += ` <i class='lni lni-angle-double-down'></i>`;
-    }
-
-   
 
     function editQuantity(id) {
       document.getElementById('stock_item_id').value = id;

@@ -1,12 +1,17 @@
-var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('inventory.db')
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('inventory1.db')
 
 
 function product(req, res) {
   let { orderby, order, page } = req.query;
+  if (!page) page = 1;
+  const offset = +page * 30 - 30;
+  // let order_by;
+  // if (orderby === 'product_name') order_by = 'products.name';
+  // if (orderby === 'product_cat') order_by = 'groups.groupname';
     db.serialize(function() {
-      if (!page) page = 1;
-      const offset = +page * 30 - 30;
+      
+      
             // lekerem az osszes termeket
         db.all(`SELECT products.id, products.name FROM products LIMIT 30 OFFSET ${offset}`, (err, products) => {
             if (err) console.error(err.toString());
@@ -33,7 +38,7 @@ function product(req, res) {
                 for(let i = 0; i < products.length; i++) {
                     products[i].groupname = products[i].groupname.sort((a, b) => (a > b) ? 1 : -1)
                 }
-                // Rendezesi query parameterek alapjan sortolom a megfelelo oszlopokat
+                //Rendezesi query parameterek alapjan sortolom a megfelelo oszlopokat
                 if (orderby === "product_name" && order === "asc") {
                   products = products.sort((a, b) => (a.name > b.name) ? 1 : -1)
                 }
@@ -65,7 +70,10 @@ function product(req, res) {
                     res.render('products', {
                         pageTitle: 'Termékek',
                         products: products,
-                        group: groups
+                        group: groups,
+                        page: page,
+                        orderby: orderby,
+                        order: order
                     });
                 });
 
@@ -92,7 +100,7 @@ function addProduct(req, res) {
             db.get(`SELECT id FROM products WHERE name = "${product_name}"`, (err, result) => {
                         if (err) console.error(err.toString());
         
-                        db.run(`INSERT INTO inventory(product_id, stock) VALUES (${result.id}, 0)`, (err) => {
+                        db.run(`INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (${result.id}, 1, 0)`, (err) => {
                             if (err) console.error(err.toString());
                         });
                     });
@@ -183,17 +191,23 @@ function editProduct(req, res) {
 function deleteProduct(req, res) {
     let { id } = req.body;
     id = parseInt(id);
+    console.log(id)
     if (id) {
         db.serialize(function () {
           //ellenorzom, hogy 0db van-e az adott termekbol keszleten
-          db.get(`SELECT stock FROM inventory WHERE product_id = ${id};`, (err, result) => {
+          db.all(`SELECT stock FROM inventory WHERE product_id = ${id};`, (err, result) => {
             if (err) console.error(err.toString())
-
+            console.log(result)
             //csak akkor lehet torolni a termeket, ha 0db van belole
             if (result.stock === 0) {
+              console.log(id)
               db.run(`DELETE FROM inventory WHERE product_id = ${id};`, (err) => {
                 if (err) console.error(err.toString())
               });
+
+              db.all(`DELETE FROM product_in_group WHERE product_id = ${id};`, (err) => {
+                  if (err) console.error(err.toString())
+                });
 
                 db.run(`DELETE FROM products WHERE id = ${id};`, (err) => {
                     if (err) console.error(err.toString())
@@ -216,9 +230,30 @@ function deleteProduct(req, res) {
 function filterCategory(req, res) {
   const { product_cat_filter } = req.body;
   db.serialize(function () {
-    db.get(`SELECT id FROM groups WHERE groupname = "${product_cat_filter}"`, (err, id) => {
+    db.get(`SELECT id, parent_id FROM groups WHERE groupname = "${product_cat_filter}"`, (err, filteredCategory) => {
       if (err) console.error(err.toString());
-      db.all(`select products.id, products.name, groups.groupname from products INNER JOIN product_in_group ON product_in_group.product_id = products.id INNER JOIN groups ON product_in_group.group_id = groups.id WHERE product_in_group.group_id = ${id.id}`, (err, result) => {
+      console.log(filteredCategory.parent_id)
+      let sqlWhere = filteredCategory.id;
+      if (filteredCategory.parent_id == 0) {
+        
+        db.all(`SELECT id FROM groups WHERE parent_id = ${filteredCategory.id}`, (err, allCategories) => {
+        
+          allCategories.forEach( (cat, idx, array) => {
+            if (idx !== array.length - 1){ 
+               if (sqlWhere) sqlWhere += `${cat.id} OR `;
+               else sqlWhere = `${cat.id} OR `
+            } else {
+              if (sqlWhere) sqlWhere += `${cat.id}`;
+               else sqlWhere = `${cat.id}`;
+            }
+
+            
+            });
+          });
+
+          }
+          console.log(sqlWhere)
+              db.all(`select products.id, products.name, groups.groupname from products INNER JOIN product_in_group ON product_in_group.product_id = products.id INNER JOIN groups ON product_in_group.group_id = groups.id WHERE product_in_group.group_id = ${sqlWhere}`, (err, result) => {
         if (err) console.error(err.toString());
       
         db.all("SELECT * FROM groups", function (err, groups) {
@@ -229,10 +264,25 @@ function filterCategory(req, res) {
               group: groups
             });
         });
+        });
+        
+      
+      //  else {
+      // db.all(`select products.id, products.name, groups.groupname from products INNER JOIN product_in_group ON product_in_group.product_id = products.id INNER JOIN groups ON product_in_group.group_id = groups.id WHERE product_in_group.group_id = ${filteredCategory.id}`, (err, result) => {
+      //   if (err) console.error(err.toString());
+      // console.log('emit vagyok?')
+      //   db.all("SELECT * FROM groups", function (err, groups) {
+      //     if (err) console.error(err.toString())
+      //       res.render('products', {
+      //         pageTitle: 'Termékek',
+      //         products: result,
+      //         group: groups
+      //       });
+      //   });
 
-        })
-
-    })
+      //   });
+      // }
+    });
   });
 }
 

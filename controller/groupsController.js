@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const sqlite3 = require('sqlite3').verbose();
 
-const db = new sqlite3.Database('inventory.db');
+const db = new sqlite3.Database('inventory1.db');
 
 router.get('/', (req, res) => {
     db.serialize(function () {

@@ -1,30 +1,44 @@
 const router = require('express').Router();
 const sqlite3 = require('sqlite3').verbose();
 
-const db = new sqlite3.Database('inventory.db');
+const db = new sqlite3.Database('inventory1.db');
 
 router.get('/', (req, res) => {
   let { orderby, order, page } = req.query;
-
   if (!page) page = 1;
   const offset = +page * 30 - 30;
-
+    let order_by;
     db.serialize(function () {
-        db.all(`SELECT products.id, products.name, inventory.stock FROM products JOIN inventory ON products.id = inventory.product_id LIMIT 30 OFFSET ${offset}`, function (err, results) {
+        if (orderby === 'product_name') order_by = 'products.name';
+        if (orderby === 'product_quantity') order_by = 'stock';
+        if (orderby && order) {
+        db.all(`SELECT products.id, products.name, SUM(inventory.stock) AS stock FROM products JOIN inventory ON products.id = inventory.product_id GROUP BY products.id ORDER BY ${order_by} ${order} LIMIT 30 OFFSET ${offset}`, function (err, results) {
             if (err) console.error(err.toString())
-
-            if (orderby === "product_name" && order === "asc") results = results.sort((a, b) => (a.name > b.name) ? 1 : -1);
-            if (orderby === "product_name" && order === "desc") results = results.sort((a, b) => (a.name < b.name) ? 1 : -1);
-            if (orderby === "product_quantity" && order === "asc") results = results.sort((a, b) => (a.stock > b.stock) ? 1 : -1);
-            if (orderby === "product_quantity" && order === "desc") results = results.sort((a, b) => (a.stock < b.stock) ? 1 : -1);
-
-
+            console.log(orderby, order)
             res.render('storage', {
                 pageTitle: 'Készletek',
-                storage: results
+                storage: results,
+                page: page,
+                orderby: orderby,
+                order: order
             });
 
         });
+        } else {
+
+        db.all(`SELECT products.id, products.name, SUM(inventory.stock) AS stock FROM products JOIN inventory ON products.id = inventory.product_id GROUP BY products.id LIMIT 30 OFFSET ${offset}`, function (err, results) {
+            if (err) console.error(err.toString())
+
+            res.render('storage', {
+                pageTitle: 'Készletek',
+                storage: results,
+                page: page
+            });
+
+        });
+
+        }
+        
     });
 })
 

@@ -25,10 +25,10 @@
                         <th class="align-middle text-center">ID</th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center"><a id="product_name_link">Megnevezes</a></th>
+                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_name"}}href="/product?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}href="/product?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/product?page={{page}}&orderby=product_name&order=asc"{{/unless}} {{#ifeq orderby "product_cat"}}href="/product?page={{page}}&orderby=product_name&order=asc"{{/ifeq}}>Megnevezes{{#ifequals order "asc" orderby "product_name"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center"><a id="product_cat_link">Csoport</a></th>
+                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_cat"}}href="/product?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_cat"}}href="/product?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/product?page={{page}}&orderby=product_cat&order=asc"{{/unless}} {{#ifeq orderby "product_name"}}href="/product?page={{page}}&orderby=product_cat&order=asc"{{/ifeq}}>Csoport{{#ifequals order "asc" orderby "product_cat"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_cat"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
                     </div>
                     <div class="col-3 w-100">
                         <th class="align-middle text-center">Muveletek</th>
@@ -67,6 +67,9 @@
       <div class="col-4"></div>
       <div class="col-4">
         <ul id="pagination" class="pagination">
+          <input type="hidden" id="page-num" value="{{page}}">
+          <input type="hidden" id="page-order" value="{{order}}">
+          <input type="hidden" id="page-orderby" value="{{orderby}}">
           <a id="prev"><li class="btn btn-info mr-2">Elozo</li></a>
           <li id="page-current" class="btn border mr-2">1</li>
           <a id="next"><li class="btn btn-info">Kovetkezo</li></a>
@@ -86,7 +89,7 @@
       </div>
       <div class="modal-body" id="modal-body">
           <div class="container">
-              <form action="/editProduct" method="POST">
+              <form action="/editProduct" method="POST" id="add-edit-form">
               <div class="row mt-4">
                   <div class="col-4 text-center mt-2">
                       <label for="product_name">Megnevezes</label>
@@ -102,7 +105,7 @@
                                 <option>Valassz csoportot</option>
                                 {{#each group}}
                                 {{#unless this.parent_id}}<optgroup label="{{this.groupname}}">{{/unless}}
-                                {{#if this.parent_id}}<option value="{{this.groupname}}">{{this.groupname}}</option>{{/if}}
+                                <option value="{{this.groupname}}">{{this.groupname}}</option>
                                 {{#unless this.parent_id}}</optgroup>{{/unless}}
                                 {{/each}}
                         </select>
@@ -112,7 +115,7 @@
                       <label for="product_description">Leiras</label>
                   </div>
                   <div class="col-8 text-left mt-2">
-                      <input class="w-100" type="text" id="product_description" name="product_description">
+                      <textarea class="w-100" type="text" id="product_description" name="product_description"></textarea>
                   </div>
               </div>
               <div class="row mt-5">
@@ -146,7 +149,7 @@
       </div>
       <div class="modal-body" id="modal-body">
           <div class="container">
-              <form action="/deleteProduct" method="POST">
+              <form action="/deleteProduct" method="POST" id="del-form">
               <div class="row mt-4">
                   <h4>Biztosan torlod ezt az elemet?</h4>
                   <input type="hidden" id="del-id" name="id" value="" />
@@ -176,67 +179,38 @@
 
 
 <script>
-     //ezzel a functionnal szedem ki a query string erteket front-enden
-    function getUrlParameter(name) {
-        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-        var results = regex.exec(location.search);
-        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        };
-
-    const orderby = getUrlParameter("orderby");
-    const order = getUrlParameter("order");
-    let page = getUrlParameter("page");
-    if (!page) page = 1;
-
-
-    const prodNameLink = document.getElementById('product_name_link');
-    const prodCatLink = document.getElementById('product_cat_link');
 
     // pagination megfelelo felparameterezese
+    const page = document.getElementById('page-num').value;
+    const page_order = document.getElementById('page-order').value;
+    const page_orderby = document.getElementById('page-orderby').value;
+
     const prevPage = document.getElementById('prev');
     const nextPage = document.getElementById('next');
     const actualPage = document.getElementById('page-current');
-    
+
+    //pagination linkek generalasa
+
     actualPage.innerText = page;
     if (page == 1) {
       prevPage.style.display = "none";
       nextPage.href = `/product?page=${+page + 1}`;
-      prodNameLink.href = `/product?page=${+page}&orderby=product_name&order=asc`;
-      prodCatLink.href = `/product?page=${+page}&orderby=product_cat&order=asc`;
+      if (page_order && page_orderby) {
+        nextPage.href = `/product?page=${+page + 1}&orderby=${page_orderby}&order=${page_order}`;
+      }
     }
     else {
       prevPage.href = `/product?page=${+page - 1}`;
       nextPage.href = `/product?page=${+page + 1}`;
-      prodNameLink.href = `/product?page=${+page}&orderby=product_name&order=asc`;
-      prodCatLink.href = `/product?page=${+page}&orderby=product_cat&order=asc`;
-    }
-
-
-    // beallitom a rendezesi linkeket a query string ertekei alapjan es beallitom a megfelelo iconokat (main.handlebarsban cdn!!!)
-    if (orderby === "product_name" && order === "asc") {
-      prodNameLink.href = `/product?page=${page}&orderby=product_name&order=desc`;
-      prodCatLink.href = `/product?page=${page}&orderby=product_cat&order=asc`;
-      prodNameLink.innerHTML += ` <i class='lni lni-angle-double-up'></i>`;
-    }
-    if (orderby === "product_name" && order === "desc") {
-      prodNameLink.href = `/product?page=${page}&orderby=product_name&order=asc`;
-      prodCatLink.href = `/product?page=${page}&orderby=product_cat&order=asc`;
-      prodNameLink.innerHTML += ` <i class='lni lni-angle-double-down'></i>`;
-    }
-    if (orderby === "product_cat" && order === "asc") {
-      prodNameLink.href = `/product?page=${page}&orderby=product_name&order=asc`;
-      prodCatLink.href = `/product?page=${page}&orderby=product_cat&order=desc`;
-      prodCatLink.innerHTML += ` <i class='lni lni-angle-double-up'></i>`;
-    }
-    if (orderby === "product_cat" && order === "desc") {
-      prodNameLink.href = `/product?page=${page}&orderby=product_name&order=asc`;
-      prodCatLink.href = `/product?page=${page}&orderby=product_cat&order=asc`;
-      prodCatLink.innerHTML += ` <i class='lni lni-angle-double-down'></i>`;
+      if (page_order && page_orderby) {
+        prevPage.href = `/product?page=${+page - 1}&orderby=${page_orderby}&order=${page_order}`;
+        nextPage.href = `/product?page=${+page + 1}&orderby=${page_orderby}&order=${page_order}`;
+      }
     }
   
 
-  const form = document.getElementsByTagName('form')[0];
+  const formAddEdit = document.getElementById('add-edit-form');
+  // const formDel = document.getElementById('del-form');
   const productCat = document.getElementById('product-cat');
   const productName = document.getElementById('product_name');
   const hiddenId = document.getElementById('hidden-id');
@@ -249,8 +223,8 @@
         productName.value = "";
         hiddenId.value = "";
 
-        form.removeAttribute('action');
-        form.setAttribute('action', '/product');
+        formAddEdit.removeAttribute('action');
+        formAddEdit.setAttribute('action', '/product');
 
         $('#product').modal();  
     }
@@ -288,8 +262,8 @@
         hiddenId.value = id;
 
         //megvaltoztatom a form action reszet a szerkesztes endpointra
-        form.removeAttribute('action');
-        form.setAttribute('action', '/editProduct');
+        formAddEdit.removeAttribute('action');
+        formAddEdit.setAttribute('action', '/editProduct');
 
         // 
         $('#product').modal(); 

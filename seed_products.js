@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('inventory.db');
+const db = new sqlite3.Database('inventory1.db');
 
 const adjectives = [
   "adó-vevő", "ajánlatos", "akadozó", "akadályozatlan", "akadékos", "akaratos", "adományozó", "agyonizzadt", "agrárius", "additív", "alakhű"
@@ -22,7 +22,8 @@ for(let i = 0; i < adjectives.length; i++) {
       db.get(`SELECT id FROM products WHERE name = '${adjectives[i]} ${pronouns[j]}'`, (err, id) => {
               if (err) console.error(err.toString());
               
-              db.run(`INSERT INTO inventory(product_id, stock) VALUES (${+id.id}, 5)`);
+              db.run(`INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (${+id.id}, 2, 5)`);
+              db.run(`INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (${+id.id}, 1, 7)`);
               db.run(`INSERT INTO product_in_group(product_id, group_id) VALUES (${+id.id}, 6)`);
             
     
