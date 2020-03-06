@@ -60,7 +60,7 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modal-title">Add meg az adott termek darabszamat!</h5>
+        <h5 class="modal-title" id="modal-title">Add meg az adott termek darabszamat az egyes raktarakban!</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -69,13 +69,13 @@
           <div class="container">
               <form action="/storage/editStock" method="POST">
               <div class="row mt-4" id="modal-content">
-                  <div class="col-4 text-center mt-2">
+                  <!--<div class="col-4 text-center mt-2">
                       <label for="stock_quantity">db:</label>
                   </div>
                   <div class="col-8 text-left mt-2">
                       <input class="w-100" type="text" id="stock_quantity" name="stock_quantity">
-                      <input type="hidden" id="stock_item_id" name="stock_item_id" value="" >
                   </div>
+                  <input type="hidden" id="stock_item_id" name="stock_item_id" value="" >-->
               </div>
               <div class="row mt-5">
                   <div class="col-2">
@@ -93,7 +93,9 @@
 
 
 
-<script>
+<script> 
+
+    const url = "https://bh-inventory-kk.lilkrisz.repl.co/"
 
     const page = document.getElementById('page-num').value;
     const page_order = document.getElementById('page-order').value;
@@ -123,9 +125,29 @@
     }
 
 
+    function generateEditModal(warehouse_id, stock, warehouse_name) {
+      return `<div class="col-4 text-center mt-2">
+                <label for="stock_quantity">${warehouse_name}</label>
+              </div>
+              <div class="col-8 text-left mt-2">
+                <input class="w-100" type="text" id="stock_quantity" name="stock_quantity" value="${stock}">
+                <input type="hidden" name="stock_wh_id" value=${warehouse_id} >
+              </div>`
+    }
+
+    const modalContent = document.getElementById('modal-content');
+
     function editQuantity(id) {
-      document.getElementById('stock_item_id').value = id;
+      fetch(`${url}/storage/loadWhs/${id}`)
+      .then(resp => resp.json())
+      .then( res => {
+        modalContent.innerHTML = "";
+        res.forEach((wh, idx) => modalContent.innerHTML += generateEditModal(wh.warehouse_id, wh.stock, wh.name))
+        modalContent.innerHTML += `<input type="hidden" name="product_id" value="${id}" >`
         $('#stock').modal();
+      })
+      
+        
     }
 
     function cancel() {

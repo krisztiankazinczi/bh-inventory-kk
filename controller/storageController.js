@@ -43,19 +43,36 @@ router.get('/', (req, res) => {
 })
 
 router.post('/editStock', (req, res) => {
-    const { stock_quantity, stock_item_id } = req.body;
-    console.log(stock_quantity, stock_item_id)
+    const { stock_quantity, stock_wh_id, product_id } = req.body;
+  console.log(stock_quantity, stock_wh_id, product_id)
     db.serialize(function () {
+      if (stock_wh_id && stock_quantity) {
+        for(let i = 0; i < stock_quantity; i++) {
 
-        if (stock_item_id && stock_quantity) {
-            db.run(`UPDATE inventory SET stock = ${+stock_quantity} WHERE product_id = ${+stock_item_id}`, (err) => {
+            db.run(`UPDATE inventory SET stock = ${+stock_quantity[i]}, WHERE product_id = ${+product_id} AND warehouse_id = ${+stock_wh_id}`, (err) => {
                 if (err) console.error(err.toString());
             });
         }
         res.redirect('/storage');
+      }
+        
+
     });
 
     
 });
+
+router.get('/loadWhs/:id', (req, res) => {
+  const id = req.params.id;
+
+  db.all(`SELECT inventory.warehouse_id, inventory.stock, warehouse.name FROM inventory JOIN warehouse ON inventory.warehouse_id = warehouse.id WHERE product_id = ${id}`, (err, result) => {
+    if (err) console.error(err.toString());
+
+    res.send(result)
+
+  })
+
+
+})
 
 module.exports = router;
