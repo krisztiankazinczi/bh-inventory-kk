@@ -23,9 +23,20 @@
                         <div class="col-3">
                             <td class="align-middle text-center" data-id="{{this.id}}">{{this.id}}</td>
                         </div>
+                       {{#if this.parent_id}}
+                            {{#each ../groups}}
+                                <div class="col-3">
+                                    {{#ifeq ../this.parent_id this.id}}<td class="align-middle text-center" data-main-group="{{../this.parent_id}}" data-groupname="{{../this.groupname}}">{{../this.groupname}} ({{this.groupname}})</td>{{/ifeq}}
+                                    
+                                </div>
+                            {{/each}}
+                        {{/if}}
+                        {{#unless this.parent_id}}
                         <div class="col-3">
-                            <td class="align-middle text-center" {{#unless this.parent_id}} data-main-group={{this.id}} {{/unless}} data-main-group="{{this.parent_id}}" data-groupname="{{this.groupname}}">{{this.groupname}}</td>
+                        <td class="align-middle text-center" {{#unless this.parent_id}} data-main-group={{this.id}} {{/unless}} data-main-group="{{this.parent_id}}" data-groupname="{{this.groupname}}">{{this.groupname}} {{#unless this.parent_id}}(Fokategoria){{/unless}}</td>
                         </div>
+                        {{/unless}}
+                        
                         <div class="col-3">
                             <td class="align-middle text-center"><button class="btn btn-info" onclick="editGroup({{this.id}})">Szerkesztes</button>
                             <button class="btn btn-danger" onclick="deleteGroup({{this.id}})">Torles</button></td>

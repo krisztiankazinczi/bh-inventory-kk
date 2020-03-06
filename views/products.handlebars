@@ -104,9 +104,12 @@
                       <select class="form-control" id="product-cat" name="product_cat" multiple=true>
                                 <option>Valassz csoportot</option>
                                 {{#each group}}
-                                {{#unless this.parent_id}}<optgroup label="{{this.groupname}}">{{/unless}}
-                                <option value="{{this.groupname}}">{{this.groupname}}</option>
-                                {{#unless this.parent_id}}</optgroup>{{/unless}}
+                                {{#unless this.parent_id}}<optgroup label="{{this.groupname}}">
+                                  <option value="{{this.groupname}}">{{this.groupname}}</option>
+                                  {{#each ../group}}
+                                    {{#ifeq this.parent_id ../this.id}}<option value="{{this.groupname}}">{{this.groupname}}</option>{{/ifeq}}
+                                  {{/each}}
+                                </optgroup>{{/unless}}
                                 {{/each}}
                         </select>
                         <input type="hidden" id="hidden-id" name="id" value="" />

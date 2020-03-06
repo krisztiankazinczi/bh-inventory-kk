@@ -57,15 +57,15 @@ function product(req, res) {
                 db.all("SELECT id, groupname, parent_id FROM groups ORDER BY parent_id, id ASC", function (err, groups) {
                     if (err) console.error(err.toString())
                     //a fokategoriak ala rendezem az alkategoriakat, hogy a handlebars megfelelo sorrendben jelentise meg es a fokategoriak ala keruljenek az alkategoriak
-                    for(let i = 0; i < groups.length; i++) {
-                      if (groups[i].parent_id === 0) {
-                        for(let j = 0; j < groups.length; j++) {
-                          if (groups[j].parent_id == groups[i].id) {
-                            groups.splice(i+1, 0, ...groups.splice(j, 1))
-                          }
-                        }
-                      }
-                    }
+                    // for(let i = 0; i < groups.length; i++) {
+                    //   if (groups[i].parent_id === 0) {
+                    //     for(let j = 0; j < groups.length; j++) {
+                    //       if (groups[j].parent_id == groups[i].id) {
+                    //         groups.splice(i+1, 0, ...groups.splice(j, 1))
+                    //       }
+                    //     }
+                    //   }
+                    // }
 
                     res.render('products', {
                         pageTitle: 'Termékek',
