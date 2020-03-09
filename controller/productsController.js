@@ -97,13 +97,13 @@ function addProduct(req, res) {
                 if (err) console.error(err.toString());
             });
 
-            db.get(`SELECT id FROM products WHERE name = "${product_name}"`, (err, result) => {
-                        if (err) console.error(err.toString());
+            // db.get(`SELECT id FROM products WHERE name = "${product_name}"`, (err, result) => {
+            //             if (err) console.error(err.toString());
         
-                        db.run(`INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (${result.id}, 1, 0)`, (err) => {
-                            if (err) console.error(err.toString());
-                        });
-                    });
+            //             db.run(`INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (${result.id}, 1, 0)`, (err) => {
+            //                 if (err) console.error(err.toString());
+            //             });
+            //         });
 
 
                 
@@ -124,7 +124,7 @@ function addProduct(req, res) {
                         });
                        
                       }
-                       res.redirect('/product');
+                       res.redirect(req.headers.referer);
                     } else { // ha csak egy termekkategoriat valasztott ki
                         db.get(`SELECT id FROM groups WHERE groupname = "${product_cat}"`, (err, group_id) => {
                             if (err) console.error(err.toString());
@@ -134,7 +134,7 @@ function addProduct(req, res) {
                             });
                           
                         });
-                        res.redirect('/product');
+                        res.redirect(req.headers.referer);
                       }
                     
                     });
@@ -173,7 +173,7 @@ function editProduct(req, res) {
           });
         });
       }
-        res.redirect('/product');
+        res.redirect(req.headers.referer);
       } else {
         db.get(`SELECT id FROM groups WHERE groupname = "${product_cat}"`, (err, group_id) => {
           if (err) console.error(err.toString());
@@ -182,7 +182,7 @@ function editProduct(req, res) {
             if (err) console.error(err.toString());
           });
         });
-        res.redirect('/product');
+        res.redirect(req.headers.referer);
       }
       }
 
@@ -195,17 +195,17 @@ function deleteProduct(req, res) {
     if (id) {
         db.serialize(function () {
           //ellenorzom, hogy 0db van-e az adott termekbol keszleten
-          db.all(`SELECT stock FROM inventory WHERE product_id = ${id};`, (err, result) => {
+          db.get(`SELECT SUM(stock) AS stock FROM inventory WHERE product_id = ${id} GROUP BY product_id;`, (err, result) => {
             if (err) console.error(err.toString())
             console.log(result)
             //csak akkor lehet torolni a termeket, ha 0db van belole
-            if (result.stock === 0) {
-              console.log(id)
+            if (result.stock === 0 ) {
+              
               db.run(`DELETE FROM inventory WHERE product_id = ${id};`, (err) => {
                 if (err) console.error(err.toString())
               });
 
-              db.all(`DELETE FROM product_in_group WHERE product_id = ${id};`, (err) => {
+              db.run(`DELETE FROM product_in_group WHERE product_id = ${id};`, (err) => {
                   if (err) console.error(err.toString())
                 });
 
@@ -213,10 +213,10 @@ function deleteProduct(req, res) {
                     if (err) console.error(err.toString())
                 });
 
-                res.redirect('/product');
+                res.redirect(req.headers.referer);
 
             } else {
-              res.redirect('/product');
+              res.redirect(req.headers.referer);
             }
           });
 

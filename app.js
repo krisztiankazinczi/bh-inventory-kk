@@ -6,6 +6,7 @@ const port = 3000;
 const product = require('./controller/productsController');
 const storage = require('./controller/storageController');
 const group = require('./controller/groupsController');
+const warehouse = require('./controller/warehouseController');
 
 app.use(express.json());
 app.use(express.urlencoded( { extended: true} ) );
@@ -30,6 +31,7 @@ app.post('/filterCategory', product.filterCategory);
 
 app.use('/storage', storage);
 app.use('/groups', group);
+app.use('/warehouses', warehouse);
 
 
 

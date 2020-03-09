@@ -1,15 +1,34 @@
+        <!--<div class="row">
+          <div class="col-4 mb-4"></div>
+          <div class="col-4 mb-4">
+            <form action="/storage/chooseWh" method="GET">
+            <select class="form-control" name="wh_id">
+              <option value="">Valassz raktarat</option>
+                {{#each whs}}
+                  <option value="{{this.id}}">{{this.name}}</option>
+                {{/each}}
+            </select>
+            
+          </div>
+          <div class="col-4 text-left mb-4">
+            <input type="submit" value="Szures" class="btn btn-primary">
+            </form>
+          </div>
+        </div>
+        -->
+
         <div class="table-responsive">
         <table class="table table-striped table-bordered table-hover">
             <thead>
                 <div class="row">
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center">ID</th>
+                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_id"}}href="/storage?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_id"}}href="/storage?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/storage?page={{page}}&orderby=product_id&order=asc"{{/unless}} {{#ifnoteq orderby "product_id"}}href="/storage?page={{page}}&orderby=product_id&order=asc"{{/ifnoteq}}>ID{{#ifequals order "asc" orderby "product_id"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_id"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_name"}}href="/storage?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}href="/storage?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/storage?page={{page}}&orderby=product_name&order=asc"{{/unless}} {{#ifeq orderby "product_quantity"}}href="/storage?page={{page}}&orderby=product_name&order=asc"{{/ifeq}}>Megnevezes{{#ifequals order "asc" orderby "product_name"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
+                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_name"}}href="/storage?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}href="/storage?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/storage?page={{page}}&orderby=product_name&order=asc"{{/unless}} {{#ifnoteq orderby "product_name"}}href="/storage?page={{page}}&orderby=product_name&order=asc"{{/ifnoteq}}>Megnevezes{{#ifequals order "asc" orderby "product_name"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_quantity"}}href="/storage?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_quantity"}}href="/storage?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/storage?page={{page}}&orderby=product_quantity&order=asc"{{/unless}} {{#ifeq orderby "product_name"}}href="/storage?page={{page}}&orderby=product_quantity&order=asc"{{/ifeq}}>Mennyiseg{{#ifequals order "asc" orderby "product_quantity"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_quantity"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
+                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_quantity"}}href="/storage?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_quantity"}}href="/storage?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/storage?page={{page}}&orderby=product_quantity&order=asc"{{/unless}} {{#ifnoteq orderby "product_quantity"}}href="/storage?page={{page}}&orderby=product_quantity&order=asc"{{/ifnoteq}}>Osszmennyiseg{{#ifequals order "asc" orderby "product_quantity"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_quantity"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
                     </div>
                     <div class="col-3 w-100">
                         <th class="align-middle text-center">Muveletek</th>
@@ -43,12 +62,10 @@
       <div class="col-4"></div>
       <div class="col-4">
         <ul id="pagination" class="pagination">
-          <input type="hidden" id="page-num" value="{{page}}">
-          <input type="hidden" id="page-order" value="{{order}}">
-          <input type="hidden" id="page-orderby" value="{{orderby}}">
-          <a id="prev"><li class="btn btn-info mr-2" >Elozo</li></a>
-          <li id="page-current" class="btn border mr-2">1</li>
-          <a id="next"><li class="btn btn-info">Kovetkezo</li></a>
+          
+          {{#ifnoteq page "1"}}<a {{#if order}}href="/storage?page={{minusPage}}&orderby={{orderby}}&order={{order}}"{{/if}}{{#unless order}}href="/storage?page={{minusPage}}"{{/unless}}><li class="btn btn-info" >Elozo</li></a>{{/ifnoteq}}
+          {{#iterateNTimes lastPage}}<a {{#if ../order}}href="/storage?page={{this}}&orderby={{../orderby}}&order={{../order}}"{{/if}}{{#unless ../order}}href="/storage?page={{this}}"{{/unless}}><li class="btn border {{#ifeq ../this page}}btn_info{{/ifeq}}">{{this}}</li></a>{{/iterateNTimes}}
+          {{#ifnoteq page lastPage}}<a {{#if order}}href="/storage?page={{plusPage}}&orderby={{orderby}}&order={{order}}"{{/if}}{{#unless order}}href="/storage?page={{plusPage}}"{{/unless}}><li class="btn btn-info">Kovetkezo</li></a>{{/ifnoteq}}
         </ul>
       </div>
       <div class="col-4"></div>
@@ -69,13 +86,7 @@
           <div class="container">
               <form action="/storage/editStock" method="POST">
               <div class="row mt-4" id="modal-content">
-                  <!--<div class="col-4 text-center mt-2">
-                      <label for="stock_quantity">db:</label>
-                  </div>
-                  <div class="col-8 text-left mt-2">
-                      <input class="w-100" type="text" id="stock_quantity" name="stock_quantity">
-                  </div>
-                  <input type="hidden" id="stock_item_id" name="stock_item_id" value="" >-->
+
               </div>
               <div class="row mt-5">
                   <div class="col-2">
@@ -95,34 +106,7 @@
 
 <script> 
 
-    const url = "https://bh-inventory-kk.lilkrisz.repl.co/"
-
-    const page = document.getElementById('page-num').value;
-    const page_order = document.getElementById('page-order').value;
-    const page_orderby = document.getElementById('page-orderby').value;
-
-    const prevPage = document.getElementById('prev');
-    const nextPage = document.getElementById('next');
-    const actualPage = document.getElementById('page-current');
-
-    //pagination linkek generalasa
-
-    actualPage.innerText = page;
-    if (page == 1) {
-      prevPage.style.display = "none";
-      nextPage.href = `/storage?page=${+page + 1}`;
-      if (page_order && page_orderby) {
-        nextPage.href = `/storage?page=${+page + 1}&orderby=${page_orderby}&order=${page_order}`;
-      }
-    }
-    else {
-      prevPage.href = `/storage?page=${+page - 1}`;
-      nextPage.href = `/storage?page=${+page + 1}`;
-      if (page_order && page_orderby) {
-        prevPage.href = `/storage?page=${+page - 1}&orderby=${page_orderby}&order=${page_order}`;
-        nextPage.href = `/storage?page=${+page + 1}&orderby=${page_orderby}&order=${page_order}`;
-      }
-    }
+    const url = "http://localhost:3000"
 
 
     function generateEditModal(warehouse_id, stock, warehouse_name) {
@@ -130,25 +114,52 @@
                 <label for="stock_quantity">${warehouse_name}</label>
               </div>
               <div class="col-8 text-left mt-2">
-                <input class="w-100" type="text" id="stock_quantity" name="stock_quantity" value="${stock}">
+                <input class="w-100" type="text" name="stock_quantity" value="${stock}">
                 <input type="hidden" name="stock_wh_id" value=${warehouse_id} >
               </div>`
     }
-
+    
     const modalContent = document.getElementById('modal-content');
 
     function editQuantity(id) {
       fetch(`${url}/storage/loadWhs/${id}`)
       .then(resp => resp.json())
       .then( res => {
-        modalContent.innerHTML = "";
-        res.forEach((wh, idx) => modalContent.innerHTML += generateEditModal(wh.warehouse_id, wh.stock, wh.name))
-        modalContent.innerHTML += `<input type="hidden" name="product_id" value="${id}" >`
+        modalContent.innerHTML = ""; // torlom a modal tartalmat, ha valaki cancelelt egy korabbi muveletet
+        //res.result.forEach((wh, idx) => modalContent.innerHTML += generateEditModal(wh.warehouse_id, wh.stock, wh.name))
+        //res.whs.forEach((wh, idx) => modalContent.innerHTML += generateEditModal(wh.id, 0, wh.name))
+        let warhouses = [];
+        
+        /*if (res.result.length === 1) {
+          for(let i = 0; i < res.whs.length; i++) {
+            if (res.whs[i].id === res.result[0].warehouse_id) {
+              res.whs.splice(i, 1);
+            }
+          }
+          res.whs.push(res.result[0]);
+        }*/
+        for(let i = 0; i < res.whs.length; i++) {
+          if (Array.isArray(res.result)) {
+            console.log(res.result.length)
+            if (res.result.length == 1) {
+              warhouses.push(res.whs[i])
+            } else {
+              if (res.result[i]) warhouses.push(res.result[i]) 
+              else warhouses.push(res.whs[i]) 
+            }
+            
+            }
+
+          } 
+        warhouses.forEach((wh, idx) => modalContent.innerHTML += generateEditModal(wh.warehouse_id, wh.stock, wh.name))
+
+        modalContent.innerHTML += `<input type="hidden" name="product_id" value="${id}" >`;
         $('#stock').modal();
       })
       
         
     }
+
 
     function cancel() {
       document.getElementById('stock_item_id').value = "";

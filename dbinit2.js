@@ -7,30 +7,12 @@ const Warehouse = require('./model/warehouse');
 const Product_in_group = require('./model/products_in_group');
 
 const g = [
-        {
-          groupname: 'Szamitastechnika',
-          parent_id: 0
-        },
-        {
-          groupname: 'Konyhatechnika',
-          parent_id: 1
-        },
-        {
-          groupname: 'Szepsegapolas',
-          parent_id: 1
-        },
-        {
-          groupname: 'Szorakozas',
-          parent_id: 0
-        },
-        {
-          groupname: 'Futestechnika',
-          parent_id: 4
-        },
-        {
-          groupname: 'Elelmiszer',
-          parent_id: 4
-        }
+        { groupname: 'Szamitastechnika', parent_id: 0 },
+        { groupname: 'Konyhatechnika', parent_id: 0 },
+        { groupname: 'Szepsegapolas', parent_id: 0 },
+        { groupname: 'Szorakozas', parent_id: 0 },
+        { groupname: 'Futestechnika', parent_id: 0 },
+        { groupname: 'Elelmiszer', parent_id: 0 }
       ];
 
 function createDbStructure() {

@@ -1,0 +1,176 @@
+
+
+<div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <div class="row">
+                    <div class="col-3 w-100">
+                        <th class="align-middle text-center">ID</th>
+                    </div>
+                    <div class="col-3 w-100">
+                        <th class="align-middle text-center">Nev</th>
+                    </div>
+                    <div class="col-3 w-100">
+                        <th class="align-middle text-center">Cim</th>
+                    </div>
+                    <div class="col-3 w-100">
+                        <th class="align-middle text-center">Muveletek</th>
+                    </div>
+                </div>
+            </thead>
+            <tbody>
+                {{#each warehouses}}
+                <div class="row">
+                    <tr id="{{this.id}}">
+                        <div class="col-3">
+                            <td class="align-middle text-center" data-id="{{this.id}}">{{this.id}}</td>
+                        </div>
+                        <div class="col-3">
+                            <td class="align-middle text-center" data-name="{{this.name}}">{{this.name}}</td>
+                        </div>
+                        <div class="col-3">
+                            <td class="align-middle text-center" data-address="{{this.address}}">{{this.address}}</td>
+                        </div>
+                        <div class="col-3">
+                            <td class="align-middle text-center"><button class="btn btn-info" onclick="editWh({{this.id}})">Szerkesztes</button>
+                            <button class="btn btn-danger" onclick="deleteWh({{this.id}})">Torles</button></td>
+                        </div>
+                    </tr>
+                </div>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="container text-right d-flex flex-row justify-content-end align-items-center">
+    <button id="change-onclick" type="button" class="btn btn-primary" onclick="addWh()">Új Raktar hozzaadasa</button>
+    </div>
+
+
+    <div class="modal fade" id="warehouse" tabindex="-1" role="dialog" aria-labelledby="warehouseModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-title"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body">
+          <div class="container">
+              <form action="/warehouses/addWh" method="POST">
+              <div class="row mt-4" id="wh-name">
+                  
+              </div>
+              <div class="row mt-4" id="wh-address">
+                  
+              </div>
+              
+              <div class="row mt-5">
+                  <div class="col-2">
+                      <button type="button" class="btn btn-info">Megse</button>
+                  </div>
+                  <div class="col-8">
+
+                  </div>
+                  <div class="col-2">
+                      <input type="submit" value="OK" class="btn btn-primary">
+                  </div>
+              </div>
+              </form>
+          </div>
+
+
+
+<!-- Hiba modal -->
+{{#if error}}
+<div class="modal fade" id="error" tabindex="-1" role="dialog" aria-labelledby="errorModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{error}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    </div>
+</div>
+{{/if}}
+
+
+<script>
+    //ha a handlebars kap error valtozot, akkor ennek a modalnak fel kellene ugrania
+    $(document).ready(function() { 
+      if(document.getElementById('error')) {$('#error').modal()};
+    })
+    
+    const form = document.getElementsByTagName('form')[0];
+
+    const whName = document.getElementById('wh-name');
+    const whAddress = document.getElementById('wh-address');
+    const modalTitle = document.getElementById('modal-title');
+
+    const addressContent = `<div class="col-4 text-center mt-2"><label for="wh_address">Raktar cime</label></div>
+                  <div class="col-8 text-left mt-2"><input class="w-100" type="text" id="wh_address" name="wh_address"></div>`;
+    const nameContent = `<div class="col-4 text-center mt-2"><label for="wh_name">Raktar neve</label></div>
+                  <div class="col-8 text-left mt-2"><input class="w-100" type="text" id="wh_name" name="wh_name"></div>`;
+    const sendID = `<input type="hidden" id="hidden-id" name="id" value="" >`;
+    const deleteContent = `<h4 id="get-group">Biztosan torlod a </h4> 
+                  <input type="hidden" id="del-id" name="id" value="" />`; 
+
+    function getAttribute(id, attribute) {
+        const row = document.getElementById(id);
+        for(let i = 0; i < row.children.length; i++ ) {
+            if (row.children[i].getAttribute(attribute)) return row.children[i].getAttribute(attribute);
+        }
+      }
+
+    function addWh() {
+        whName.innerHTML = '';
+        whAddress.innerHTML = '';
+
+        modalTitle.innerText = 'Uj raktar hozzaadasa';
+
+        whName.innerHTML = nameContent;
+        whAddress.innerHTML = addressContent;
+
+        form.removeAttribute('action');
+        form.setAttribute('action', '/warehouses/addWh');
+
+        $('#warehouse').modal();
+    }
+
+    function editWh(id) {
+        whName.innerHTML = '';
+        whAddress.innerHTML = '';
+
+        modalTitle.innerText = 'Raktar szerkesztese';
+
+        whName.innerHTML = nameContent;
+        whAddress.innerHTML = addressContent;
+        whAddress.innerHTML += sendID;
+        document.getElementById('hidden-id').value = id;
+        document.getElementById('wh_name').value = getAttribute(id, 'data-name');
+        document.getElementById('wh_address').value = getAttribute(id, 'data-address');
+
+        form.removeAttribute('action');
+        form.setAttribute('action', '/warehouses/editWh');
+
+        $('#warehouse').modal();
+    }
+
+    function deleteWh(id) {
+        whName.innerHTML = '';
+        whAddress.innerHTML = '';
+
+        whName.innerHTML = deleteContent;
+        whName.getElementsByTagName('h4')[0].innerHTML += `<b><i>${getAttribute(id, 'data-name')}</i></b>-t?`;
+        document.getElementById('del-id').value = id;
+
+        form.removeAttribute('action');
+        form.setAttribute('action', '/warehouses/delWh');
+
+        $('#warehouse').modal();
+    }
+   
+</script>
