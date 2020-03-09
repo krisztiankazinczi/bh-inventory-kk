@@ -34,14 +34,23 @@ router.post('/addWh', (req, res) =>{
 
 router.post('/editWh', (req, res) =>{
     const { id, wh_name, wh_address } = req.body;
-    
-    dbFunctions.editWh(req, res, id, wh_name, wh_address, error);    
+    (async () => {
+      const result = await warehouse.editWh(req, res, id, wh_name, wh_address, error);
+      if (result !== 'success') error = result;
+      res.redirect('/warehouses');
+    })();
+    // dbFunctions.editWh(req, res, id, wh_name, wh_address, error);    
 })
 
 
 router.post('/delWh', (req, res) =>{
     const { id } = req.body;
-    dbFunctions.delWh(req, res, id, error)    
+    (async () => {
+      const result = await warehouse.delWh(req, res, id, error)
+      if (result !== 'success') error = result;
+      res.redirect('/warehouses');
+    })();
+    // dbFunctions.delWh(req, res, id, error)    
 })
 
 

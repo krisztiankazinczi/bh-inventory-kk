@@ -44,18 +44,51 @@ class Warehouse {
   editWh(req, res, id, name, address, error) {
     const stmt = db.prepare("UPDATE warehouse SET name = ?, address = ? WHERE id = ?", err => {if (err) console.error(err.toString())});
 
-    db.serialize(function () {
+    return new Promise((resolve) => {
         if (name && address) {
             stmt.run(name, address, id);
-            res.redirect('/warehouses');
+            resolve('success');
         } else {
-            error = 'Nem sikerult hozzaadni a raktarat, mert nem minden mezo volt kitoltve.'
-            res.redirect('/warehouses');
+            error = 'Nem sikerult szerkeszteni a raktar tulajdonsagait, mert nem minden mezo volt kitoltve.'
+            resolve(error);
         }
     });
-}
+  }
+
+
+  delWh(req, res, id, error) {
+    const isWhEmpty = `SELECT product_id, warehouse_id, stock FROM inventory WHERE warehouse_id = ?`;
+    const delStmt = db.prepare(`DELETE FROM warehouse WHERE id = ?`);
+
+    return new Promise((resolve) => {
+        if (id) {
+            //Csak akkor torlom, ha a raktar ures
+            (async () => {
+            const results = await checkStockInWh(isWhEmpty, id)
+              if (results.length == 0) {
+                delStmt.run(id);
+                resolve('success')
+              } else {
+                  error = `Ez a raktar nem ures, igy nem tudjuk torolni az adatbazisbol`;
+                  resolve(error)
+              }
+            })(); 
+          }
+    });
+  }
+
 
 }
+
+function checkStockInWh(sqlstmt, params) {
+  return new Promise((resolve) => {
+    db.all(sqlstmt, [params], (err, results) => {
+      if (err) console.error(err.toString())
+      resolve(results)
+  });
+})
+}
+
 
 const warehouse = new Warehouse();
 
