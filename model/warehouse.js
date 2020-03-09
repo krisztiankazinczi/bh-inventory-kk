@@ -15,62 +15,72 @@ class Warehouse {
         [name, address])
   }
 
-  getAllWhs(req, res, error) {
+  getAllWhs(req, res) {
     const sql = `SELECT id, name, address FROM warehouse`;
 
       return new Promise((resolve, reject) => {
         db.all(sql, (err, results) => {
-          if (err) {console.error(err.toString()); reject(err)}
+          if (err) {console.error(err.toString()); reject()}
           else resolve(results)
         });
       })
         
   }
 
-  addWh(req, res, name, address, error) {
+  addWh(req, res, name, address) {
     const stmt = db.prepare("INSERT INTO warehouse(name, address) VALUES (?,?)");
-      return new Promise((resolve) => {  
+      return new Promise((resolve, reject) => {  
         // ha mindket mezo ki volt toltve, akkor hozza letre a sort az adatbazisban, kulonben egy hibauzenetet kuld vissza
         if (name && address) {
-            stmt.run(name, address);
-            resolve('success')
+            stmt.run(name, address, (err) => {
+              if (err) {
+                console.error(err.toString()); 
+                reject('Adatbazis hiba');
+              }
+              resolve('success')
+            });
         } else {
-            error = 'Nem sikerult hozzaadni a raktarat, mert nem minden mezo volt kitoltve.'
-            resolve(error);
+            reject('Az egyik input field ures maradt');
         }
       });
   }
 
-  editWh(req, res, id, name, address, error) {
-    const stmt = db.prepare("UPDATE warehouse SET name = ?, address = ? WHERE id = ?", err => {if (err) console.error(err.toString())});
+  editWh(req, res, id, name, address) {
+    const stmt = db.prepare("UPDATE warehouse SET name = ?, address = ? WHERE id = ?");
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         if (name && address) {
-            stmt.run(name, address, id);
-            resolve('success');
+            stmt.run(name, address, id, (err) => {
+               if (err) { 
+                  console.error(err.toString()) 
+                  reject('Adatbazis hiba')
+                 } else resolve('success');
+            });
         } else {
-            error = 'Nem sikerult szerkeszteni a raktar tulajdonsagait, mert nem minden mezo volt kitoltve.'
-            resolve(error);
+            reject('Nem sikerult szerkeszteni a raktar tulajdonsagait, mert nem minden mezo volt kitoltve.');
         }
     });
   }
 
 
-  delWh(req, res, id, error) {
+  delWh(req, res, id) {
     const isWhEmpty = `SELECT product_id, warehouse_id, stock FROM inventory WHERE warehouse_id = ?`;
     const delStmt = db.prepare(`DELETE FROM warehouse WHERE id = ?`);
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         if (id) {
-            //Csak akkor torlom, ha a raktar ures
             (async () => {
-            const results = await checkStockInWh(isWhEmpty, id)
+            const results = await checkStockInWh(isWhEmpty, id).catch(error => console.log(error));
               if (results.length == 0) {
-                delStmt.run(id);
-                resolve('success')
+                delStmt.run(id, err => {
+                  if (err) { 
+                  console.error(err.toString()) 
+                  reject('Adatbazis hiba')
+                  } else resolve('success')
+                });
+                
               } else {
-                  error = `Ez a raktar nem ures, igy nem tudjuk torolni az adatbazisbol`;
-                  resolve(error)
+                  reject(`Ez a raktar nem ures, igy nem tudjuk torolni az adatbazisbol`)
               }
             })(); 
           }
@@ -81,9 +91,9 @@ class Warehouse {
 }
 
 function checkStockInWh(sqlstmt, params) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     db.all(sqlstmt, [params], (err, results) => {
-      if (err) console.error(err.toString())
+      if (err) {console.error(err.toString()); reject(err)}
       resolve(results)
   });
 })

@@ -24,8 +24,8 @@ router.get('/', (req, res) => {
 router.post('/addWh', (req, res) =>{
     const { wh_name, wh_address } = req.body;
     (async () => {
-      const result = await warehouse.addWh(req, res, wh_name, wh_address, error);
-      if (result !== 'success') error = result; // ha nem sikerult akkor a globalis error valtozot egyenleove teszem a hibauzenettel, amit majd egy error modal megjelenit amikor visszarendereli a weboldalt
+      const result = await warehouse.addWh(req, res, wh_name, wh_address).catch(error => console.log(error));
+      if (result !== 'success') error = 'Nem sikerult hozzaadni a raktarat, mert nem minden mezo volt kitoltve.';
       res.redirect('/warehouses');
     })();
     
@@ -35,19 +35,18 @@ router.post('/addWh', (req, res) =>{
 router.post('/editWh', (req, res) =>{
     const { id, wh_name, wh_address } = req.body;
     (async () => {
-      const result = await warehouse.editWh(req, res, id, wh_name, wh_address, error);
-      if (result !== 'success') error = result;
+      const result = await warehouse.editWh(req, res, id, wh_name, wh_address, error).catch(error => console.log(error));
+      if (result !== 'success') error = 'Nem sikerult szerkeszteni a raktar tulajdonsagait, mert nem minden mezo volt kitoltve.';
       res.redirect('/warehouses');
-    })();
-    // dbFunctions.editWh(req, res, id, wh_name, wh_address, error);    
+    })();   
 })
 
 
 router.post('/delWh', (req, res) =>{
     const { id } = req.body;
     (async () => {
-      const result = await warehouse.delWh(req, res, id, error)
-      if (result !== 'success') error = result;
+      const result = await warehouse.delWh(req, res, id, error).catch(error => console.log(error));
+      if (result !== 'success') error = `Ez a raktar nem ures, igy nem tudjuk torolni az adatbazisbol`;
       res.redirect('/warehouses');
     })();
     // dbFunctions.delWh(req, res, id, error)    
