@@ -15,27 +15,49 @@ class Warehouse {
         [name, address])
   }
 
-  getAllWh(req, res, error) {
+  getAllWhs(req, res, error) {
     const sql = `SELECT id, name, address FROM warehouse`;
 
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
         db.all(sql, (err, results) => {
-          if (err) console.error(err.toString())
-  
-          res.render(`warehouse`, {
-              pageTitle: 'Raktarak',
-              warehouses: results,
-              error: error
-          });
-          resolve(results)
-          error = undefined; // minden rendereles utan torlom az error uzenet erteket
-  
-      });
+          if (err) {console.error(err.toString()); reject(err)}
+          else resolve(results)
+        });
       })
         
   }
 
+  addWh(req, res, name, address, error) {
+    const stmt = db.prepare("INSERT INTO warehouse(name, address) VALUES (?,?)");
+      return new Promise((resolve) => {  
+        // ha mindket mezo ki volt toltve, akkor hozza letre a sort az adatbazisban, kulonben egy hibauzenetet kuld vissza
+        if (name && address) {
+            stmt.run(name, address);
+            resolve('success')
+        } else {
+            error = 'Nem sikerult hozzaadni a raktarat, mert nem minden mezo volt kitoltve.'
+            resolve(error);
+        }
+      });
+  }
+
+  editWh(req, res, id, name, address, error) {
+    const stmt = db.prepare("UPDATE warehouse SET name = ?, address = ? WHERE id = ?", err => {if (err) console.error(err.toString())});
+
+    db.serialize(function () {
+        if (name && address) {
+            stmt.run(name, address, id);
+            res.redirect('/warehouses');
+        } else {
+            error = 'Nem sikerult hozzaadni a raktarat, mert nem minden mezo volt kitoltve.'
+            res.redirect('/warehouses');
+        }
+    });
 }
 
-module.exports = Warehouse;
+}
+
+const warehouse = new Warehouse();
+
+module.exports = warehouse;
 
