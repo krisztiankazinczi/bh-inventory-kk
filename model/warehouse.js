@@ -20,7 +20,7 @@ class Warehouse {
 
       return new Promise((resolve, reject) => {
         db.all(sql, (err, results) => {
-          if (err) {console.error(err.toString()); reject()}
+          if (err) {console.error(err.toString()); reject('Adatbazis hiba')}
           else resolve(results)
         });
       })
@@ -67,23 +67,25 @@ class Warehouse {
     const isWhEmpty = `SELECT product_id, warehouse_id, stock FROM inventory WHERE warehouse_id = ?`;
     const delStmt = db.prepare(`DELETE FROM warehouse WHERE id = ?`);
 
-    return new Promise((resolve, reject) => {
+    return new Promise( async (resolve, reject) => {
         if (id) {
-            (async () => {
-            const results = await checkStockInWh(isWhEmpty, id).catch(error => console.log(error));
-              if (results.length == 0) {
-                delStmt.run(id, err => {
-                  if (err) { 
-                  console.error(err.toString()) 
-                  reject('Adatbazis hiba')
-                  } else resolve('success')
-                });
-                
-              } else {
-                  reject(`Ez a raktar nem ures, igy nem tudjuk torolni az adatbazisbol`)
-              }
-            })(); 
+          let results;
+          try {
+            results = await checkStockInWh(isWhEmpty, id);
+          } catch (err) {
+            console.log(err)
           }
+          if (results.length == 0) {
+            delStmt.run(id, err => {
+              if (err) { 
+                console.error(err.toString()) 
+                reject('Adatbazis hiba')
+              } else resolve('success')
+            });          
+          } else {
+              reject(`Ez a raktar nem ures, igy nem tudjuk torolni az adatbazisbol`)
+            }
+        }
     });
   }
 
@@ -93,7 +95,7 @@ class Warehouse {
 function checkStockInWh(sqlstmt, params) {
   return new Promise((resolve, reject) => {
     db.all(sqlstmt, [params], (err, results) => {
-      if (err) {console.error(err.toString()); reject(err)}
+      if (err) {console.error(err.toString()); reject('Adatbazis hiba')}
       resolve(results)
   });
 })
