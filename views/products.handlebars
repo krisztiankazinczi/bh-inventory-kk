@@ -1,7 +1,7 @@
         <div class="row">
           <div class="col-4 mb-4"></div>
           <div class="col-4 mb-4">
-            <form action="/filterCategory" method="POST">
+            <form action="/product/filterCategory" method="POST">
             <select class="form-control" name="product_cat_filter">
               <option value="">Valassz csoportot</option>
                 {{#each group}}
@@ -22,13 +22,13 @@
             <thead>
                 <div class="row">
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center">ID</th>
+                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_id"}}href="/product?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_id"}}href="/product?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/product?page={{page}}&orderby=product_id&order=asc"{{/unless}} {{#ifnoteq orderby "product_id"}}href="/product?page={{page}}&orderby=product_id&order=asc"{{/ifnoteq}}>ID{{#ifequals order "asc" orderby "product_id"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_id"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_name"}}href="/product?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}href="/product?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/product?page={{page}}&orderby=product_name&order=asc"{{/unless}} {{#ifeq orderby "product_cat"}}href="/product?page={{page}}&orderby=product_name&order=asc"{{/ifeq}}>Megnevezes{{#ifequals order "asc" orderby "product_name"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
+                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_name"}}href="/product?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}href="/product?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/product?page={{page}}&orderby=product_name&order=asc"{{/unless}} {{#ifnoteq orderby "product_name"}}href="/product?page={{page}}&orderby=product_name&order=asc"{{/ifnoteq}}>Megnevezes{{#ifequals order "asc" orderby "product_name"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_name"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
                     </div>
                     <div class="col-3 w-100">
-                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_cat"}}href="/product?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_cat"}}href="/product?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/product?page={{page}}&orderby=product_cat&order=asc"{{/unless}} {{#ifeq orderby "product_name"}}href="/product?page={{page}}&orderby=product_cat&order=asc"{{/ifeq}}>Csoport{{#ifequals order "asc" orderby "product_cat"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_cat"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
+                        <th class="align-middle text-center"><a {{#ifequals order "asc" orderby "product_cat"}}href="/product?page={{page}}&orderby={{orderby}}&order=desc"{{/ifequals}} {{#ifequals order "desc" orderby "product_cat"}}href="/product?page={{page}}&orderby={{orderby}}&order=asc"{{/ifequals}} {{#unless orderby}}href="/product?page={{page}}&orderby=product_cat&order=asc"{{/unless}} {{#ifnoteq orderby "product_cat"}}href="/product?page={{page}}&orderby=product_cat&order=asc"{{/ifnoteq}}>Csoport{{#ifequals order "asc" orderby "product_cat"}}<i class='lni lni-angle-double-up'></i>{{/ifequals}} {{#ifequals order "desc" orderby "product_cat"}}<i class='lni lni-angle-double-down'></i>{{/ifequals}}</a></th>
                     </div>
                     <div class="col-3 w-100">
                         <th class="align-middle text-center">Muveletek</th>
@@ -70,9 +70,9 @@
           <input type="hidden" id="page-num" value="{{page}}">
           <input type="hidden" id="page-order" value="{{order}}">
           <input type="hidden" id="page-orderby" value="{{orderby}}">
-          <a id="prev"><li class="btn btn-info mr-2">Elozo</li></a>
-          <li id="page-current" class="btn border mr-2">1</li>
-          <a id="next"><li class="btn btn-info">Kovetkezo</li></a>
+          {{#ifnoteq page "1"}}<a {{#if order}}href="/product?page={{minusPage}}&orderby={{orderby}}&order={{order}}"{{/if}}{{#unless order}}href="/product?page={{minusPage}}"{{/unless}}><li class="btn btn-info" >Elozo</li></a>{{/ifnoteq}}
+          {{#iterateNTimes lastPage}}<a {{#if ../order}}href="/product?page={{this}}&orderby={{../orderby}}&order={{../order}}"{{/if}}{{#unless ../order}}href="/product?page={{this}}"{{/unless}}><li class="btn border {{#ifeq ../this page}}btn_info{{/ifeq}}">{{this}}</li></a>{{/iterateNTimes}}
+          {{#ifnoteq page lastPage}}<a {{#if order}}href="/product?page={{plusPage}}&orderby={{orderby}}&order={{order}}"{{/if}}{{#unless order}}href="/product?page={{plusPage}}"{{/unless}}><li class="btn btn-info">Kovetkezo</li></a>{{/ifnoteq}}
         </ul>
       </div>
       <div class="col-4"></div>
@@ -152,7 +152,7 @@
       </div>
       <div class="modal-body" id="modal-body">
           <div class="container">
-              <form action="/deleteProduct" method="POST" id="del-form">
+              <form action="/product/deleteProduct" method="POST" id="del-form">
               <div class="row mt-4">
                   <h4>Biztosan torlod ezt az elemet?</h4>
                   <input type="hidden" id="del-id" name="id" value="" />
@@ -194,22 +194,22 @@
 
     //pagination linkek generalasa
 
-    actualPage.innerText = page;
-    if (page == 1) {
-      prevPage.style.display = "none";
-      nextPage.href = `/product?page=${+page + 1}`;
-      if (page_order && page_orderby) {
-        nextPage.href = `/product?page=${+page + 1}&orderby=${page_orderby}&order=${page_order}`;
-      }
-    }
-    else {
-      prevPage.href = `/product?page=${+page - 1}`;
-      nextPage.href = `/product?page=${+page + 1}`;
-      if (page_order && page_orderby) {
-        prevPage.href = `/product?page=${+page - 1}&orderby=${page_orderby}&order=${page_order}`;
-        nextPage.href = `/product?page=${+page + 1}&orderby=${page_orderby}&order=${page_order}`;
-      }
-    }
+    // actualPage.innerText = page;
+    // if (page == 1) {
+    //   prevPage.style.display = "none";
+    //   nextPage.href = `/product?page=${+page + 1}`;
+    //   if (page_order && page_orderby) {
+    //     nextPage.href = `/product?page=${+page + 1}&orderby=${page_orderby}&order=${page_order}`;
+    //   }
+    // }
+    // else {
+    //   prevPage.href = `/product?page=${+page - 1}`;
+    //   nextPage.href = `/product?page=${+page + 1}`;
+    //   if (page_order && page_orderby) {
+    //     prevPage.href = `/product?page=${+page - 1}&orderby=${page_orderby}&order=${page_order}`;
+    //     nextPage.href = `/product?page=${+page + 1}&orderby=${page_orderby}&order=${page_order}`;
+    //   }
+    // }
   
 
   const formAddEdit = document.getElementById('add-edit-form');
@@ -227,7 +227,7 @@
         hiddenId.value = "";
 
         formAddEdit.removeAttribute('action');
-        formAddEdit.setAttribute('action', '/product');
+        formAddEdit.setAttribute('action', '/product/product');
 
         $('#product').modal();  
     }
@@ -266,7 +266,7 @@
 
         //megvaltoztatom a form action reszet a szerkesztes endpointra
         formAddEdit.removeAttribute('action');
-        formAddEdit.setAttribute('action', '/editProduct');
+        formAddEdit.setAttribute('action', '/product/editProduct');
 
         // 
         $('#product').modal(); 

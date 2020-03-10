@@ -5,12 +5,12 @@ class Group {
 
  createTable() {
     const sql = "CREATE TABLE IF NOT EXISTS groups (id INTEGER PRIMARY KEY AUTOINCREMENT, groupname VARCHAR(60) NOT NULL, parent_id INTEGER)"
-    return this.db.run(sql);
+    return db.run(sql);
   }
 
 
   insert(groupname, parent_id) {
-    return this.db.run(
+    return db.run(
       `INSERT INTO groups (groupname, parent_id)
         VALUES (?, ?)`,
         [groupname, parent_id])
@@ -97,7 +97,7 @@ class Group {
     const delGroup = db.prepare('DELETE FROM groups WHERE id = ?');
     const delFromConnectTable = db.prepare('DELETE FROM product_in_group WHERE group_id = ?');
     if (id) {
-      //Csak akkor torlom, ha nincs alkategoriaja az adott kategorianak
+      
       return new Promise(async (resolve, reject) => {
         let result;
 
@@ -106,7 +106,7 @@ class Group {
         } catch (err) {
           console.log(err)
         }
-        
+        //Csak akkor torlom, ha nincs alkategoriaja az adott kategorianak
         if(result.length === 0) {
           delGroup.run(id, (err) => {
             if (err) {console.error(err.toString()); reject('Adatbazis hiba')}

@@ -1,7 +1,4 @@
 const router = require('express').Router();
-const sqlite3 = require('sqlite3').verbose();
-
-const db = new sqlite3.Database('inventory1.db');
 
 const group = require('../model/groups');
 
@@ -19,6 +16,7 @@ router.get('/', async (req, res) => {
     groups: results,
     error: error
   });
+  error = undefined;
 });
 
 
@@ -58,9 +56,3 @@ router.post('/delGroup', async (req,res) => {
 
 
 module.exports = router;
-
-
-db.all("SELECT id, groupname, parent_id FROM groups", function (err, results) {
-            if (err) console.error(err.toString());
-            console.log(results)
-})

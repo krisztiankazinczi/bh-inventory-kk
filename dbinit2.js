@@ -91,8 +91,12 @@ db.serialize(function () {
     db.run("CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id INTEGER NOT NULL, warehouse_id INTEGER NOT NULL, stock INTEGER NOT NULL, FOREIGN KEY (product_id) REFERENCES products (id), FOREIGN KEY (warehouse_id) REFERENCES warehouse (id))");
 
     db.run("INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (1, 1, 18)");
+    db.run("INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (1, 2, 18)");
     db.run("INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (2, 1, 13)");
+    db.run("INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (2, 2, 13)");
+    db.run("INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (3, 1, 4)");
     db.run("INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (3, 2, 4)");
+    db.run("INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (4, 1, 2)");
     db.run("INSERT INTO inventory(product_id, warehouse_id, stock) VALUES (4, 2, 2)");
 
 

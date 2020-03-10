@@ -21,14 +21,14 @@ app.set('view engine', 'handlebars');
 app.use(express.static('public'))
 
 
-app.get('/product', product.product);
-app.post('/product', product.addProduct);
-app.post('/editProduct', product.editProduct);
-app.post('/deleteProduct', product.deleteProduct);
-app.post('/filterCategory', product.filterCategory);
+// app.get('/product', product.product);
+// app.post('/product', product.addProduct);
+// app.post('/editProduct', product.editProduct);
+// app.post('/deleteProduct', product.deleteProduct);
+// app.post('/filterCategory', product.filterCategory);
 
 
-
+app.use('/product', product)
 app.use('/storage', storage);
 app.use('/groups', group);
 app.use('/warehouses', warehouse);

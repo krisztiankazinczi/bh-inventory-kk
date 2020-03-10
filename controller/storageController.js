@@ -3,58 +3,88 @@ const sqlite3 = require('sqlite3').verbose();
 
 const db = new sqlite3.Database('inventory1.db');
 
-router.get('/', (req, res) => {
+const inventory = require('../model/inventory');
+
+router.get('/', async (req, res) => {
   let { orderby, order, page } = req.query;
   if (!page) page = 1;
   const offset = +page * 30 - 30;
-    let order_by;
-    db.serialize(function () {
-        if (orderby === 'product_name') order_by = 'products.name';
-        if (orderby === 'product_id') order_by = 'products.id';
-        if (orderby === 'product_quantity') order_by = 'stock';
+  let order_by;
+    if (orderby === 'product_name') order_by = 'products.name';
+    if (orderby === 'product_id') order_by = 'products.id';
+    if (orderby === 'product_quantity') order_by = 'stock';
+  let totalCount;
+  try {
+     totalCount = await inventory.getTotalProductsNum();
+  } catch (err) {
+    error = err;
+  }
+  
+  const lastPage = Math.ceil(totalCount.total / 30);
 
-        db.get(`SELECT COUNT(name) AS allProduct FROM products`, (err, allProduct) => {
-          if (err) console.error(err.toString())
-          const lastPage = Math.ceil(allProduct.allProduct / 30);
+ let results;
+ try {
+     results = await inventory.getProductsAndStock(offset, order_by, order);
+  } catch (err) {
+    error = err;
+  }
+
+  res.render(`storage`, {
+    pageTitle: 'Készletek',
+    storage: results,
+    lastPage: lastPage,
+    page: page,
+    minusPage: page - 1,
+    plusPage: +page + 1,
+    orderby: orderby,
+    order: order
+  });
+
+    // db.serialize(function () {
+        
+
+    //     db.get(`SELECT COUNT(name) AS allProduct FROM products`, (err, allProduct) => {
+    //       if (err) console.error(err.toString())
+    //       const lastPage = Math.ceil(allProduct.allProduct / 30);
           
 
-          if (orderby && order) {
+    //       if (orderby && order) {
 
-            db.all(`SELECT products.id, products.name, SUM(inventory.stock) AS stock FROM products LEFT JOIN inventory ON products.id = inventory.product_id GROUP BY products.id ORDER BY ${order_by} ${order} LIMIT 30 OFFSET ${offset}`, function (err, results) {
-                if (err) console.error(err.toString())
+    //         db.all(`SELECT products.id, products.name, SUM(inventory.stock) AS stock FROM products LEFT JOIN inventory ON products.id = inventory.product_id GROUP BY products.id ORDER BY ${order_by} ${order} LIMIT 30 OFFSET ${offset}`, function (err, results) {
+    //             if (err) console.error(err.toString())
                 
-                res.render(`storage`, {
-                    pageTitle: 'Készletek',
-                    storage: results,
-                    lastPage: lastPage,
-                    page: page,
-                    minusPage: page - 1,
-                    plusPage: +page + 1,
-                    orderby: orderby,
-                    order: order
-                });
+    //             res.render(`storage`, {
+    //                 pageTitle: 'Készletek',
+    //                 storage: results,
+    //                 lastPage: lastPage,
+    //                 page: page,
+    //                 minusPage: page - 1,
+    //                 plusPage: +page + 1,
+    //                 orderby: orderby,
+    //                 order: order
+    //             });
     
-            });
-            } else {
+    //         });
+    //         } else {
     
-            db.all(`SELECT products.id, products.name, SUM(inventory.stock) AS stock FROM products JOIN inventory ON products.id = inventory.product_id GROUP BY products.id LIMIT 30 OFFSET ${offset}`, function (err, results) {
-                if (err) console.error(err.toString())
+    //         db.all(`SELECT products.id, products.name, SUM(inventory.stock) AS stock FROM products JOIN inventory ON products.id = inventory.product_id GROUP BY products.id LIMIT 30 OFFSET ${offset}`, function (err, results) {
+    //             if (err) console.error(err.toString())
 
-                res.render(`storage`, {
-                    pageTitle: 'Készletek',
-                    storage: results,
-                    lastPage: lastPage,
-                    page: page,
-                    minusPage: page - 1,
-                    plusPage: +page + 1
-                });
+    //             res.render(`storage`, {
+    //                 pageTitle: 'Készletek',
+    //                 storage: results,
+    //                 lastPage: lastPage,
+    //                 page: page,
+    //                 minusPage: page - 1,
+    //                 plusPage: +page + 1
+    //             });
     
-            });
+    //         });
     
-            }
-        })
+    //         }
+    //     })
         
-    });
+    // });
 })
 
 router.post('/editStock', (req, res) => {
